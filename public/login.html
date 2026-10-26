@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login — Monitoramento de Vagas Pátios Print</title>
+  <style>
+    :root {
+      --font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --green-dark: #064e3b;
+      --green-mid: #047857;
+      --green-light: #10b981;
+      --green-soft: #ecfdf5;
+      --text-dark: #0f291e;
+      --muted: #52796f;
+      --border: #d1fae5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      background: radial-gradient(circle at 50% 20%, #0d4d38 0%, #083325 55%, #041f16 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      background: #ffffff;
+      border-radius: 22px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* TOPO VERDE DA TELA COM LOGO */
+    .login-header {
+      background: linear-gradient(135deg, #064e3b 0%, #047857 70%, #059669 100%);
+      padding: 28px 24px 22px;
+      text-align: center;
+      color: #fff;
+      position: relative;
+    }
+    .brand-logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+    }
+    .brand-logo-wrap img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+    }
+    .login-header h1 {
+      font-size: 20px;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+    .login-header p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: #a7f3d0;
+      font-weight: 500;
+    }
+
+    .login-body {
+      padding: 26px 28px 24px;
+    }
+
+    /* SELEÇÃO RÁPIDA DE PERFIL (3 OPÇÕES) */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .profile-chips {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .profile-chip {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .profile-chip:hover {
+      background: #f0fdf4;
+      border-color: #86efac;
+      transform: translateY(-1px);
+    }
+    .profile-chip.active {
+      background: #ecfdf5;
+      border-color: #059669;
+      box-shadow: 0 0 0 1px #059669;
+    }
+    .chip-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chip-icon {
+      font-size: 20px;
+      width: 32px;
+      height: 32px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .chip-info strong {
+      display: block;
+      font-size: 13px;
+      color: #0f291e;
+    }
+    .chip-info small {
+      font-size: 11px;
+      color: #64748b;
+    }
+    .chip-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .profile-chip.active .chip-tag {
+      background: #059669;
+      color: #fff;
+    }
+
+    /* FORMULÁRIO */
+    .form-field {
+      margin-bottom: 14px;
+    }
+    .form-field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 5px;
+    }
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap input {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px 0 36px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .input-wrap input:focus {
+      border-color: var(--green-mid);
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.15);
+    }
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      top: 13px;
+      font-size: 14px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    .btn-toggle-pass {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 6px;
+    }
+
+    .alert {
+      display: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+    .alert.error {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 44px;
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(4, 120, 87, 0.35);
+      transition: transform 0.1s, box-shadow 0.15s;
+      margin-top: 18px;
+    }
+    .btn-submit:hover {
+      box-shadow: 0 6px 18px rgba(4, 120, 87, 0.45);
+      transform: translateY(-1px);
+    }
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-container">
+  <!-- TOPO VERDE COM LOGO -->
+  <div class="login-header">
+    <div class="brand-logo-wrap">
+      <img src="/imagens/logo-print.png" alt="Print Entregando Soluções" onerror="this.style.display='none'">
+    </div>
+    <h1>Monitoramento de vagas pátios Print</h1>
+    <p>Pátio Jaraguá · Controle de Vagas</p>
+  </div>
+
+  <div class="login-body">
+    <div id="alertBox" class="alert"></div>
+
+    <span class="section-label">Selecione o perfil de acesso:</span>
+    <div class="profile-chips" id="profileChips">
+      <!-- 1. ADMIN -->
+      <div class="profile-chip active" data-login="admin" data-name="Administrador" data-role="admin" data-op="Todos" onclick="selectProfile(this)">
+        <div class="chip-left">
+          <div class="chip-icon">👑</div>
+          <div class="chip-info">
+            <strong>Admin</strong>
+            <small>Gestão completa e calibração de vagas</small>
+          </div>
+        </div>
+        <span class="chip-tag">Geral</span>
+      </div>
+
+      <!-- 2. OPERAÇÃO DIVERSOS -->
+      <div class="profile-chip" data-login="diversos" data-name="Operação Diversos" data-role="diversos" data-op="Diversos" onclick="selectProfile(this)">
+        <div class="chip-left">
+          <div class="chip-icon">📦</div>
+          <div class="chip-info">
+            <strong>Operação Diversos</strong>
+            <small>Cargas gerais e docas diversas</small>
+          </div>
+        </div>
+        <span class="chip-tag">Operador</span>
+      </div>
+
+      <!-- 3. OPERAÇÃO CORREIOS -->
+      <div class="profile-chip" data-login="correios" data-name="Operação Correios" data-role="correios" data-op="Correios" onclick="selectProfile(this)">
+        <div class="chip-left">
+          <div class="chip-icon">📬</div>
+          <div class="chip-info">
+            <strong>Operação Correios</strong>
+            <small>Linhas e carretas dos Correios</small>
+          </div>
+        </div>
+        <span class="chip-tag">Operador</span>
+      </div>
+    </div>
+
+    <!-- FORMULÁRIO DE LOGIN -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-field">
+        <label>Usuário / Operador</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input id="loginUser" value="admin" required autocomplete="username">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label>Senha de Acesso</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input id="loginPass" type="password" value="123456" required autocomplete="current-password">
+          <button type="button" class="btn-toggle-pass" onclick="togglePass()" title="Ver senha">👁</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <span>Entrar no Sistema</span>
+        <span>→</span>
+      </button>
+    </form>
+
+    <div class="footer-note">
+      Print Entregando Soluções · Vagas Pátio Jaraguá
+    </div>
+  </div>
+</div>
+
+<script>
+const USERS = {
+  admin: {
+    login: 'admin',
+    name: 'Administrador do Sistema',
+    role: 'admin',
+    roleLabel: 'Admin',
+    defaultOp: 'Todos',
+    pass: '123456'
+  },
+  diversos: {
+    login: 'diversos',
+    name: 'Operador Diversos',
+    role: 'diversos',
+    roleLabel: 'Operação Diversos',
+    defaultOp: 'Diversos',
+    pass: '123456'
+  },
+  correios: {
+    login: 'correios',
+    name: 'Operador Correios',
+    role: 'correios',
+    roleLabel: 'Operação Correios',
+    defaultOp: 'Correios',
+    pass: '123456'
+  }
+};
+
+let currentSelected = 'admin';
+
+function selectProfile(el) {
+  document.querySelectorAll('.profile-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const login = el.dataset.login;
+  currentSelected = login;
+
+  const user = USERS[login];
+  if (user) {
+    document.getElementById('loginUser').value = user.login;
+    document.getElementById('loginPass').value = user.pass;
+    hideAlert();
+  }
+}
+
+function togglePass() {
+  const p = document.getElementById('loginPass');
+  p.type = p.type === 'password' ? 'text' : 'password';
+}
+
+function showAlert(msg) {
+  const b = document.getElementById('alertBox');
+  b.textContent = msg;
+  b.className = 'alert error';
+}
+
+function hideAlert() {
+  document.getElementById('alertBox').className = 'alert';
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  const uInput = document.getElementById('loginUser').value.trim().toLowerCase();
+  const pInput = document.getElementById('loginPass').value.trim();
+
+  const user = USERS[uInput];
+  if (!user) {
+    showAlert('Usuário não encontrado. Selecione Admin, Operação Diversos ou Operação Correios.');
+    return;
+  }
+
+  if (pInput !== user.pass && pInput !== '123456') {
+    showAlert('Senha incorreta. A senha padrão de teste é 123456.');
+    return;
+  }
+
+  // Grava sessão no localStorage
+  const session = {
+    login: user.login,
+    name: user.name,
+    role: user.role,
+    roleLabel: user.roleLabel,
+    defaultOp: user.defaultOp,
+    loggedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem('vagas_print_auth', JSON.stringify(session));
+
+  // Redireciona para o mapa do pátio
+  window.location.href = '/index.html';
+}
+
+// Se já estiver logado, redireciona para a página principal
+try {
+  const existing = JSON.parse(localStorage.getItem('vagas_print_auth') || 'null');
+  if (existing && existing.login) {
+    window.location.href = '/index.html';
+  }
+} catch(e) {}
+</script>
+</body>
+</html>

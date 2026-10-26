@@ -1,0 +1,91 @@
+Para um sistema de Pátio/YMS, a melhor janela NÃO é um `pop-up` no meio da tela, e sim um **Drawer Lateral Direito** de 480px a 520px. Assim o operador não perde o contexto do mapa do pátio.
+
+Ela tem 3 variações, dependendo do que está na vaga:
+
+### 1. Estrutura da Janela - Padrão para todos os tipos
+
+**[ HEADER - Fixo ]**
+```
+[VAGA A-12]  [Status: OCUPADA] [X]
+Doca 03 | Pátio 1
+```
+Cor do Header muda por Status: Verde= Liberado | Amarelo= Aguardando | Vermelho= Bloqueado/Divergência | Cinza= Vazio
+
+**[ CORPO - Visual do Veículo ]**
+Essa é a parte mais importante. Vista superior do veículo:
+
+1.  **Só Cavalo Mecânico:** Mostra só o truck 4x2 / 6x2
+2.  **Só Carreta:** Mostra só a carreta sem cavalo [Desengatada]
+3.  **Conjunto Completo:** Mostra Cavalo + Carreta engatados
+
+> Acima do desenho, 2 placas grandes e bem visíveis. É o que o pátio mais precisa ver de longe.
+
+**[ CORPO - Abas de Informação ]**
+
+| Aba 1: VEÍCULO | Aba 2: MOTORISTA | Aba 3: OPERAÇÃO |
+| :--- | :--- | :--- |
+| **Placa Cavalo:** BRA2E19 | **Nome:** João Silva | **Transportadora:** Translog |
+| **Placa Carreta:** FEL1234 | **CPF:** ***.123.*** | **Carga:** Soja a Granel |
+| **Frota / Tipo:** LS 6x2 + 3 Eixos | **CNH:** Válida até 12/26 | **Cliente:** Bunge |
+| **Modelo:** Volvo FH 540 | **Telefone:** (11) 9xxxx-xxxx | **Peso:** 32.500 kg |
+| **Engate:** [ Botão Desengatar ] | **Foto:** [miniatura] | **NF-e:** 154879 |
+
+**Rodapé com Métricas de Tempo:**
+```
+Entrada: 15/05 às 08:32 [ há 02h 15min ]
+Previsão Saída: 15/05 às 14:00 | Doca: 04
+```
+Com uma barrinha de tempo de permanência.
+
+**[ FOOTER - Ações ]**
+```
+[ Ver Histórico ] [ Mover de Vaga ] [ Liberar Vaga ]
+        [ BOTÃO PRINCIPAL: Chamar para Doca ]
+```
+
+---
+
+### 2. Exemplo Visual do Mockup
+
+Assim ficaria o Conjunto Completo:
+
+```
++------------------------------------------+
+| < VAGA B-07 - OCUPADA            [X]     |
+| Pátio Central - Fila de Espera           |
+|------------------------------------------|
+|                                          |
+|      [ BRA2E19 ]      [ FEL7J34 ]        |
+|      CAVALO           CARRETA            |
+|      +-------+ +-------------------+      |
+|      | O---O | | O---O---O         |      |
+|      +-------+ +-------------------+      |
+|           ^ Engatado - Conjunto          |
+|                                          |
+| [Veículo] [Motorista] [Operação]         |
+|------------------------------------------|
+| Transportadora: Rodonaves                |
+| Motorista: Carlos A. Pereira  (11) 9...  |
+| Carga: Carga Seca - Eletrodomésticos     |
+| Status Operacional: AGUARDANDO DOCA      |
+|------------------------------------------|
+| Entrada: Hoje 09:15 (1h 10min no pátio)  |
+|------------------------------------------|
+| [ Mover ] [ Desengatar Carreta ] [ Liberar Chamada ] |
++------------------------------------------+
+```
+
+Se fosse **SÓ CARRETA DESENGATADA**, o sistema mostra um alerta visual importante:
+
+> `⚠️ CARRETA DESENGATADA | Cavalo: Não identificado | Tempo desengatada: 4h`
+
+E o desenho mostra só a carreta, com a cor cinza/amarela para indicar que está sem cavalo.
+
+### 3. Regras de Ouro para essa Janela
+
+1.  **Placa Gigante:** A placa tem que ser o maior texto da janela. Fonte 24px bold.
+2.  **Ação de Desengate:** Se for conjunto, tem que ter um botão de `Desengatar`. Ao clicar, o sistema transforma 1 vaga com conjunto em 1 vaga com carreta, e libera o cavalo para ir para outra vaga de "Só Cavalo".
+3.  **Vaga Vazia:** Ao clicar em vaga vazia, não mostra veículo. Mostra: `VAGA LIVRE` + Botão `[ Alocar Veículo Nesta Vaga ]` + `[ Reservar ]`
+4.  **Foto/Câmera:** No canto, uma miniatura da câmera do pátio daquela vaga. `Ver ao vivo`.
+
+Quer que eu gere o código dessa janela em React + Tailwind para você já implementar? Ou prefere que eu crie o layout visual dela no estilo Figma para você mandar para o time de design?

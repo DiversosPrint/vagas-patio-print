@@ -1,0 +1,1853 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Monitoramento de vagas pátios Print</title>
+  <style>
+    :root {
+      --font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --bg: #edf3f7;
+      --navy: #0d2a43;
+      --blue: #1769aa;
+      --blue-dark: #0f4d7d;
+      --green: #168653;
+      --orange: #ea580c;
+      --card-bg: #ffffff;
+      --border: #d8e4eb;
+      --text: #17324d;
+      --muted: #607789;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    /* TOPO DO SISTEMA NA COR VERDE COM LOGO PRINT */
+    .top {
+      background: linear-gradient(110deg, #064e3b 0%, #047857 60%, #059669 100%);
+      color: #fff;
+      padding: 12px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 3px 14px rgba(6, 78, 59, 0.35);
+    }
+    .top-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .top-logo-wrap {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 4px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+    }
+    .top-logo {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+    }
+    .top-left h1 {
+      font-size: 19px;
+      margin: 0;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.01em;
+    }
+    .top-left small {
+      color: #a7f3d0;
+      font-size: 12px;
+      display: block;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 4px 8px 4px 12px;
+      border-radius: 99px;
+      color: #fff;
+      font-size: 12px;
+    }
+    .user-role-icon {
+      font-size: 16px;
+    }
+    .user-info-text strong {
+      display: block;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+    .user-info-text small {
+      font-size: 10px;
+      color: #a7f3d0;
+      display: block;
+    }
+    .btn-logout {
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-left: 4px;
+    }
+    .btn-logout:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .top-search {
+      position: relative;
+    }
+    .top-search input {
+      height: 36px;
+      padding: 0 12px 0 32px;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      font-size: 13px;
+      width: 220px;
+      outline: none;
+      transition: background 0.2s, width 0.2s;
+    }
+    .top-search input::placeholder { color: #bcd5e6; }
+    .top-search input:focus {
+      background: #fff;
+      color: #17324d;
+      width: 260px;
+    }
+    .top-search:before {
+      content: '⌕';
+      position: absolute;
+      left: 10px;
+      top: 8px;
+      color: #bcd5e6;
+      font-size: 16px;
+      pointer-events: none;
+    }
+    .btn {
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #244158;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .btn:hover { background: #f4f8fb; }
+    .btn.primary {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+    .btn.primary:hover { background: var(--blue-dark); }
+    .btn.danger {
+      background: #fff;
+      color: #dc2626;
+      border-color: #fca5a5;
+    }
+    .btn.danger:hover {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .btn.calibrate.active {
+      background: #f59e0b;
+      color: #fff;
+      border-color: #d97706;
+    }
+
+    .page {
+      padding: 16px 22px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .stats-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 6px 14px;
+      font-size: 13px;
+      color: #334e68;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .chip b { color: var(--navy); }
+    .legend {
+      display: flex;
+      gap: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    /* Semântica visual: verde = livre/disponível; azul = ocupada. */
+    .dot.free { background: var(--green); }
+    .dot.occ { background: var(--blue); }
+    .dot.borr { background: var(--orange); }
+
+    .mapcard {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: 0 4px 18px rgba(13,42,67,0.06);
+      overflow: auto;
+    }
+    .map {
+      position: relative;
+      min-width: 940px;
+      width: 100%;
+      aspect-ratio: 1144 / 767;
+      background: url('/imagens/patio-print-sem-veiculos.png') center/contain no-repeat;
+      user-select: none;
+    }
+    .slot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      border: 2px solid #fff;
+      border-radius: 6px;
+      min-width: 38px;
+      height: 25px;
+      padding: 0 6px;
+      color: #fff;
+      background: var(--green);
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 2px 7px rgba(13,42,67,0.4);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: transform 0.1s, box-shadow 0.15s, outline 0.15s;
+      z-index: 2;
+    }
+    .slot-code { line-height: 1; }
+    .slot-type-icon { margin-left: 3px; font-size: 11px; line-height: 1; }
+    .slot-hover-card {
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 8px);
+      transform: translateX(-50%);
+      display: none;
+      min-width: 168px;
+      padding: 9px 11px;
+      border-radius: 9px;
+      background: #102a43;
+      color: #fff;
+      text-align: left;
+      white-space: normal;
+      box-shadow: 0 6px 18px rgba(13,42,67,0.4);
+      z-index: 100;
+      pointer-events: none;
+    }
+    .slot-hover-card strong,
+    .slot-hover-card span,
+    .slot-hover-card small { display: block; }
+    .slot-hover-card strong { font-size: 11px; color: #9bd7f5; margin-bottom: 3px; }
+    .slot-hover-card span { font-size: 12px; font-weight: 800; letter-spacing: 0.02em; }
+    .slot-hover-card small { font-size: 10px; color: #c7d9e5; margin-top: 4px; }
+    .slot:hover .slot-hover-card,
+    .slot:focus-visible .slot-hover-card { display: block; }
+    .slot:hover {
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow: 0 4px 14px rgba(13,42,67,0.55);
+      z-index: 10;
+    }
+    .slot.occupied {
+      background: var(--blue);
+      min-width: 68px;
+      font-size: 10px;
+    }
+    .slot.borracharia {
+      background: var(--orange);
+      border-color: #ffedd5;
+    }
+    .slot.borracharia.occupied {
+      background: #15803d;
+      border-color: #fed7aa;
+    }
+    .slot.dragging {
+      opacity: 0.85;
+      cursor: grab;
+      z-index: 50;
+      outline: 3px dashed #f59e0b;
+    }
+    .slot.highlight {
+      animation: slotBlink 1s infinite alternate;
+      z-index: 20;
+    }
+    @keyframes slotBlink {
+      from { transform: translate(-50%, -50%) scale(1); outline: 3px solid #f59e0b; }
+      to { transform: translate(-50%, -50%) scale(1.25); outline: 5px solid #ef4444; }
+    }
+
+    /* MODAL DE CADASTRO E DETALHES DA VAGA */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 29, 42, 0.45);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(10,34,54,0.22);
+      padding: 30px 34px 24px;
+      position: relative;
+      max-height: 94vh;
+      overflow-y: auto;
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      text-align: center;
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #f1f5f9;
+      border: none;
+      color: #64748b;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .modal-close-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .modal-title {
+      font-size: 23px;
+      font-weight: 700;
+      color: #0c3356;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .modal-subtitle {
+      font-size: 13px;
+      color: #5c7285;
+      margin-top: 5px;
+    }
+    .modal-accent-bar {
+      width: 46px;
+      height: 3px;
+      background: #1769aa;
+      border-radius: 3px;
+      margin: 12px auto 0;
+    }
+
+    /* SEÇÃO 1: DADOS DA VAGA */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 20px 0 12px;
+    }
+    .section-heading .section-icon {
+      font-size: 16px;
+      color: #1769aa;
+    }
+    .section-heading h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #154c79;
+      margin: 0;
+    }
+    .vaga-dados-container {
+      display: flex;
+      gap: 18px;
+      align-items: stretch;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #e6eff5;
+    }
+    .vaga-dados-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      row-gap: 12px;
+      column-gap: 16px;
+    }
+    .dado-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .dado-label {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    .dado-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: #17324d;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      width: fit-content;
+    }
+    .status-pill.occ {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+    .status-pill.free {
+      background: #ecfdf5;
+      border: 1px solid #86efac;
+      color: #166534;
+    }
+    .status-pill.borr {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+    }
+    .status-pill .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      background: transparent;
+    }
+    .modelo-box {
+      width: 200px;
+      min-height: 120px;
+      background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f1f5f9 100%);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8px 10px;
+      color: #688296;
+      font-size: 11px;
+      line-height: 1.35;
+      flex-shrink: 0;
+      border: 1px solid #cbd5e1;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .modelo-img {
+      width: 100%;
+      height: 88px;
+      object-fit: contain;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.22));
+      transition: transform 0.2s ease;
+    }
+    .modelo-img:hover {
+      transform: scale(1.04);
+    }
+    .modelo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .modelo-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+      opacity: 0.7;
+    }
+    .modelo-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: #064e3b;
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-top: 4px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .btn-model-chip {
+      padding: 3px 10px;
+      border-radius: 99px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-model-chip:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .btn-model-chip.active {
+      background: #047857;
+      border-color: #047857;
+      color: #fff;
+    }
+
+    /* SEÇÃO 2: CADASTRO DO VEÍCULO / CONJUNTO */
+    .vehicle-section-box {
+      background: #f7fafc;
+      border: 1px solid #dbe6ef;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-top: 10px;
+    }
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .mode-tab {
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .mode-tab:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .mode-tab.active {
+      background: #1769aa;
+      border-color: #1769aa;
+      color: #fff;
+    }
+    .vehicle-box-header {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1b4b73;
+      margin-bottom: 12px;
+    }
+
+    /* CARDS DE PLACAS BRANCAS */
+    .plates-registration-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .plates-registration-grid.two-cols {
+      grid-template-columns: 1fr 1fr;
+    }
+    .vehicle-unit-card {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .plate-white-badge {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: inline-block;
+      min-width: 140px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .plate-white-badge .plate-lbl {
+      display: block;
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .plate-input {
+      border: none;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: #0f172a;
+      width: 100%;
+      background: transparent;
+      outline: none;
+      font-family: monospace, var(--font);
+      text-transform: uppercase;
+    }
+    .plate-input::placeholder {
+      color: #94a3b8;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: normal;
+    }
+    .unit-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      row-gap: 8px;
+      column-gap: 12px;
+      font-size: 12px;
+    }
+    .unit-details-grid .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .unit-details-grid span {
+      font-size: 10px;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+    .unit-details-grid strong {
+      font-size: 12px;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* AUTOCOMPLETE POPUP */
+    .autocomplete-wrap {
+      position: relative;
+    }
+    .autocomplete-results {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      margin-top: 4px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      display: none;
+    }
+    .autocomplete-results.show { display: block; }
+    .autocomplete-item {
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .autocomplete-item:hover { background: #f0f7ff; }
+
+    /* CAMPOS ADICIONAIS DE OPERAÇÃO */
+    .extra-fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 4px;
+    }
+    .form-control {
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #1e293b;
+      background: #fff;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #1769aa;
+    }
+
+    /* SEÇÃO 3: HISTÓRICO DA VAGA */
+    .history-cards-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .history-metric-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .history-metric-card span {
+      display: block;
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+    .history-metric-card strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f273d;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* TIMELINE COMPLETA DE HISTÓRICO (EXPANSÍVEL) */
+    .history-timeline-panel {
+      margin-top: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: none;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .history-timeline-panel.show { display: block; }
+    .timeline-item {
+      padding: 6px 0;
+      border-bottom: 1px dashed #e2e8f0;
+      font-size: 12px;
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-item strong { color: #1e293b; }
+    .timeline-item small { color: #64748b; display: block; margin-top: 2px; }
+
+    /* FOOTER MODAL */
+    .modal-footer {
+      border-top: 1px solid #e2e8f0;
+      margin-top: 22px;
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .footer-left { display: flex; gap: 8px; }
+    .footer-right { display: flex; gap: 8px; }
+
+    @media (max-width: 680px) {
+      .modal-card { padding: 20px; }
+      .vaga-dados-container { flex-direction: column; }
+      .modelo-box { width: 100%; height: 70px; }
+      .plates-registration-grid.two-cols { grid-template-columns: 1fr; }
+      .history-cards-row { grid-template-columns: 1fr; }
+      .extra-fields-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-left">
+    <div class="top-brand">
+      <div class="top-logo-wrap">
+        <img src="/imagens/logo-print.png" alt="Print Entregando Soluções" class="top-logo" onerror="this.style.display='none'">
+      </div>
+      <div>
+        <h1>Monitoramento de vagas pátios Print</h1>
+        <small>Pátio Jaraguá · Controle Operacional de Vagas em Tempo Real</small>
+      </div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <div class="user-badge" id="userBadge">
+      <span class="user-role-icon" id="userRoleIcon">👑</span>
+      <div class="user-info-text">
+        <strong id="userName">Admin</strong>
+        <small id="userRoleLabel">Administrador</small>
+      </div>
+      <button class="btn-logout" onclick="logout()" title="Sair / Trocar Operador">Sair</button>
+    </div>
+    <div class="top-search">
+      <input id="quickSearch" placeholder="Buscar placa ou vaga..." oninput="filterMap(this.value)">
+    </div>
+    <button id="calibBtn" class="btn calibrate" onclick="toggleCalibration()" title="Arrastar vagas para ajustar posições no mapa">
+      ⚙ Ajustar Vagas
+    </button>
+    <button class="btn" onclick="load()" title="Recarregar dados">
+      ↻ Atualizar
+    </button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="bar">
+    <div class="stats-chips" id="statsChips">
+      <span class="chip">Carregando vagas...</span>
+    </div>
+    <div class="legend">
+      <span><i class="dot free"></i> Livre</span>
+      <span><i class="dot occ"></i> Ocupada</span>
+      <span><i class="dot borr"></i> Borracharia (Vagas 01 e 02)</span>
+    </div>
+  </div>
+
+  <section class="mapcard">
+    <div id="map" class="map"></div>
+  </section>
+</main>
+
+<!-- MODAL FLUTUANTE CENTRALIZADO DE DETALHES E CADASTRO DA VAGA -->
+<div id="modalOverlay" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <button class="modal-close-btn" onclick="closeModal()" title="Fechar">✕</button>
+      <h2 class="modal-title">Detalhes da vaga selecionada</h2>
+      <div class="modal-subtitle" id="modalSubtitle">Pátio Jaraguá · Vaga 07</div>
+      <div class="modal-accent-bar"></div>
+    </div>
+
+    <!-- SEÇÃO 1: DADOS DA VAGA -->
+    <div class="section-heading">
+      <span class="section-icon">📍</span>
+      <h3>Dados da vaga</h3>
+    </div>
+
+    <div class="vaga-dados-container">
+      <div class="vaga-dados-grid">
+        <div class="dado-item">
+          <span class="dado-label">Vaga</span>
+          <strong class="dado-val" id="valVaga">07</strong>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Pátio</span>
+          <strong class="dado-val" id="valPatio">Pátio Jaraguá</strong>
+        </div>
+
+        <div class="dado-item">
+          <span class="dado-label">Status</span>
+          <div id="valStatusPill" class="status-pill occ">
+            <span class="pill-dot"></span>
+            <span id="valStatusText">Ocupada</span>
+          </div>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Operação</span>
+          <strong class="dado-val" id="valOperacao">Correios</strong>
+        </div>
+
+        <div class="dado-item">
+          <span class="dado-label">Entrada</span>
+          <strong class="dado-val" id="valEntrada">25/10/2026 às 08:42</strong>
+        </div>
+        <div class="dado-item">
+          <span class="dado-label">Tempo no pátio</span>
+          <strong class="dado-val" id="valTempo">2h 18min</strong>
+        </div>
+      </div>
+
+      <div class="modelo-box" id="modeloBox">
+        <img id="modeloImg" src="" alt="Modelo" class="modelo-img" style="display:none">
+        <div id="modeloPlaceholder" class="modelo-placeholder">
+        </div>
+        <div id="modeloBadge" class="modelo-badge" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 2: VEÍCULO DESATRELADO OU CONJUNTO CADASTRADO PELA PLACA -->
+    <div class="section-heading" id="vehicleSectionHeading">
+      <span class="section-icon">🚚</span>
+      <h3 id="vehicleSectionTitle">Veículo desatrelado cadastrado pela placa</h3>
+    </div>
+
+    <div class="vehicle-section-box">
+      <!-- Seletor do tipo de cadastro -->
+      <div class="mode-tabs">
+        <button type="button" class="mode-tab active" id="tabIsolated" onclick="setMode('isolated')">
+          ● Veículo desatrelado
+        </button>
+        <button type="button" class="mode-tab" id="tabConjunto" onclick="setMode('conjunto')">
+          ● Conjunto (2 placas)
+        </button>
+        <button type="button" class="mode-tab" id="tabEmpty" onclick="setMode('empty')">
+          ○ Vaga livre (desocupar)
+        </button>
+      </div>
+
+      <div class="vehicle-box-header" id="vehicleBoxHeader">
+        Veículo desatrelado — cavalo ou carreta
+      </div>
+
+      <!-- CARDS DE PLACAS BRANCAS (1 ou 2 placas conforme o modo) -->
+      <div id="platesGrid" class="plates-registration-grid">
+        <!-- BLOCO 1: PLACA DO CAVALO / VEÍCULO DESATRELADO -->
+        <div class="vehicle-unit-card" id="unitCardVehicle">
+          <div class="plate-white-badge">
+            <span class="plate-lbl" id="labelPlate1">Placa</span>
+            <div class="autocomplete-wrap">
+              <input id="inputPlate1" class="plate-input" placeholder="ABC1D23" maxlength="10" autocomplete="off" oninput="onPlateInput('vehicle', this.value)">
+              <div id="resultsVehicle" class="autocomplete-results"></div>
+            </div>
+            <input type="hidden" id="vehicleDbId" value="">
+          </div>
+
+          <div class="model-select-row" style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+            <span style="font-size:11px;color:#64748b;font-weight:600">Modelo:</span>
+            <button type="button" class="btn-model-chip" id="chipAxor" onclick="selectModelChoice('Axor')">Axor</button>
+            <button type="button" class="btn-model-chip" id="chipVolks" onclick="selectModelChoice('Volks')">Volks / 19360</button>
+            <button type="button" class="btn-model-chip" id="chipScania" onclick="selectModelChoice('Scania')">Scania</button>
+          </div>
+
+          <div class="unit-details-grid">
+            <div class="detail-item">
+              <span>Tipo</span>
+              <strong id="card1Tipo">Cavalo</strong>
+            </div>
+            <div class="detail-item">
+              <span>Status</span>
+              <strong id="card1Status">Em atividade</strong>
+            </div>
+            <div class="detail-item">
+              <span>Chassi</span>
+              <strong id="card1Chassi">Consultado no BD</strong>
+            </div>
+            <div class="detail-item">
+              <span>Base destino</span>
+              <strong id="card1Base">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- BLOCO 2: PLACA DA CARRETA (SÓ ABRE SE SELECIONAR CONJUNTO) -->
+        <div class="vehicle-unit-card" id="unitCardTrailer" style="display:none">
+          <div class="plate-white-badge">
+            <span class="plate-lbl">Placa Carreta</span>
+            <div class="autocomplete-wrap">
+              <input id="inputPlate2" class="plate-input" placeholder="XYZ9E87" maxlength="10" autocomplete="off" oninput="onPlateInput('trailer', this.value)">
+              <div id="resultsTrailer" class="autocomplete-results"></div>
+            </div>
+            <input type="hidden" id="trailerDbId" value="">
+          </div>
+
+          <div class="unit-details-grid">
+            <div class="detail-item">
+              <span>Tipo</span>
+              <strong id="card2Tipo">Carreta</strong>
+            </div>
+            <div class="detail-item">
+              <span>Status</span>
+              <strong id="card2Status">Em atividade</strong>
+            </div>
+            <div class="detail-item">
+              <span>Chassi</span>
+              <strong id="card2Chassi">Consultado no BD</strong>
+            </div>
+            <div class="detail-item">
+              <span>Base destino</span>
+              <strong id="card2Base">—</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPOS ADICIONAIS: OPERAÇÃO, MOTORISTA E OBSERVAÇÕES -->
+      <div id="extraFieldsContainer">
+        <div class="extra-fields-row">
+          <div class="form-group">
+            <label>Operação da Vaga</label>
+            <select id="editOperacao" class="form-control" onchange="onOpChange(this.value)">
+              <option value="Correios">Correios</option>
+              <option value="Diversos">Diversos</option>
+              <option value="Borracharia / Pneus">Borracharia / Pneus</option>
+              <option value="Descarga">Descarga</option>
+              <option value="Carregamento">Carregamento</option>
+              <option value="Aguardando Doca">Aguardando Doca</option>
+              <option value="Manutenção">Manutenção</option>
+              <option value="Estacionado">Estacionado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Motorista / Responsável (Opcional)</label>
+            <input id="editDriver" class="form-control" placeholder="Nome do motorista">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:10px">
+          <label>Observações</label>
+          <input id="editNotes" class="form-control" placeholder="Motivo de manutenção, detalhes da carga, etc.">
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 3: HISTÓRICO DA VAGA -->
+    <div class="section-heading">
+      <span class="section-icon">🕒</span>
+      <h3>Histórico da vaga</h3>
+    </div>
+
+    <div class="history-cards-row">
+      <div class="history-metric-card">
+        <span>Última saída</span>
+        <strong id="histUltimaSaida">24/10/2026 às 18:10</strong>
+      </div>
+      <div class="history-metric-card">
+        <span>Ocupações registradas</span>
+        <strong id="histTotalOcupacoes">18 movimentações</strong>
+      </div>
+      <div class="history-metric-card">
+        <span>Última placa</span>
+        <strong id="histUltimaPlaca">JKL4M56</strong>
+      </div>
+    </div>
+
+    <!-- LISTAGEM DETALHADA DE HISTÓRICO (TOGGLE) -->
+    <div id="historyTimelinePanel" class="history-timeline-panel">
+      <!-- Inserido dinamicamente -->
+    </div>
+
+    <!-- FOOTER DA MODAL -->
+    <div class="modal-footer">
+      <div class="footer-left">
+        <button id="btnRelease" class="btn danger" onclick="releaseSlot()" style="display:none">
+          ✕ Liberar Vaga
+        </button>
+      </div>
+      <div class="footer-right">
+        <button class="btn" onclick="closeModal()">Fechar</button>
+        <button class="btn" id="btnToggleHistory" onclick="toggleHistoryTimeline()">Ver histórico completo</button>
+        <button class="btn primary" onclick="saveOccupancy()">Salvar Cadastro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// CONTROLE DE ACESSO E SESSÃO (Admin, Operação Diversos, Operação Correios)
+let currentUser = null;
+function checkAuth() {
+  try {
+    const auth = JSON.parse(localStorage.getItem('vagas_print_auth') || 'null');
+    if (!auth || !auth.login) {
+      window.location.href = '/login.html';
+      return null;
+    }
+    return auth;
+  } catch(e) {
+    window.location.href = '/login.html';
+    return null;
+  }
+}
+currentUser = checkAuth();
+
+function applyUserPermissions() {
+  if (!currentUser) return;
+  document.getElementById('userName').textContent = currentUser.roleLabel || currentUser.name;
+  document.getElementById('userRoleLabel').textContent = currentUser.role === 'admin' ? 'Acesso Total' : 'Operador';
+  const iconEl = document.getElementById('userRoleIcon');
+  if (currentUser.role === 'admin') iconEl.textContent = '👑';
+  else if (currentUser.role === 'correios') iconEl.textContent = '📬';
+  else iconEl.textContent = '📦';
+
+  // Apenas Admin pode ver e usar a calibração de vagas
+  const calibBtn = document.getElementById('calibBtn');
+  if (calibBtn) {
+    calibBtn.style.display = currentUser.role === 'admin' ? 'inline-flex' : 'none';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('vagas_print_auth');
+  window.location.href = '/login.html';
+}
+
+applyUserPermissions();
+
+let slots = [];
+let vehicles = [];
+let activeSlot = null;
+let currentMode = 'isolated'; // 'isolated' | 'conjunto' | 'empty'
+let isCalibrating = false;
+let currentSlotHistory = [];
+let currentModelChoice = null; // 'Axor' | 'Volks' | 'Scania' | null
+
+// DIRETRIZ DE RESOLUÇÃO DE IMAGENS DO MODELO
+function resolveModelImage(mode, cavaloInfo, explicitChoice) {
+  // Vaga livre não deve mostrar imagem, modelo ou descrição de exemplo.
+  // A imagem só aparece depois que uma placa real foi informada/localizada.
+  if (mode === 'empty' || !cavaloInfo?.plate) return null;
+
+  let modelKey = explicitChoice; // 'Axor' | 'Volks' | 'Scania'
+
+  if (!modelKey) {
+    const text = [
+      cavaloInfo.model || '',
+      cavaloInfo.brand || '',
+      cavaloInfo.type || '',
+      cavaloInfo.plate || '',
+      cavaloInfo.notes || ''
+    ].join(' ').toUpperCase();
+
+    if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044') || text.includes('2544')) {
+      modelKey = 'Axor';
+    } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('R 440') || text.includes('G380') || text.includes('G 380') || text.includes('G420') || text.includes('P360') || text.includes('P 360') || text.includes('G370') || text.includes('G 370')) {
+      modelKey = 'Scania';
+    } else if (text.includes('19360') || text.includes('19.360') || text.includes('19 360') || text.includes('VOLKS') || text.includes('VW') || text.includes('CONSTELLATION')) {
+      modelKey = 'Volks';
+    }
+  }
+
+  // DIRETRIZES DO USUÁRIO:
+  // 1. Para cavalos Axor use a imagem Axor 2038.webp
+  // 2. para cavalo Volks ou 19360 use a imagem 19360.webp
+  // 3. para qualquer conjunto onde o cavalo for Axor use a imagem Conjunto com Axor.webp
+  // 4. conjunto com cavalo Scania use a imagem Conjunto com Scania.webp
+  // 5. conjunto com Volks ou 19360 use a imagem Conjunto com Volks.webp
+  if (mode === 'conjunto') {
+    if (modelKey === 'Scania') {
+      return { file: 'Conjunto com Scania.webp', label: 'Conjunto com Scania' };
+    }
+    if (modelKey === 'Volks') {
+      return { file: 'Conjunto com Volks.webp', label: 'Conjunto com Volks' };
+    }
+    // Axor ou default para conjunto
+    return { file: 'Conjunto com Axor.webp', label: 'Conjunto com Axor' };
+  } else {
+    // mode === 'isolated' (Cavalo desatrelado)
+    if (modelKey === 'Volks') {
+      return { file: '19360.webp', label: 'Cavalo Volks 19.360' };
+    }
+    // Axor ou default para cavalo
+    return { file: 'Axor 2038.webp', label: 'Cavalo Axor 2038' };
+  }
+}
+
+function selectModelChoice(choice) {
+  if (currentModelChoice === choice) {
+    currentModelChoice = null;
+  } else {
+    currentModelChoice = choice;
+  }
+  updateModelChips();
+  updateVehicleModelDisplay();
+}
+
+function updateModelChips() {
+  document.getElementById('chipAxor')?.classList.toggle('active', currentModelChoice === 'Axor');
+  document.getElementById('chipVolks')?.classList.toggle('active', currentModelChoice === 'Volks');
+  document.getElementById('chipScania')?.classList.toggle('active', currentModelChoice === 'Scania');
+}
+
+function getActiveCavaloInfo() {
+  const c = activeSlot?.current;
+  const v = c?.vehicle || {};
+  const inputPlate = document.getElementById('inputPlate1')?.value.trim().toUpperCase() || '';
+  const matched = vehicles.find(item => item.plate.toUpperCase() === inputPlate);
+
+  return {
+    plate: inputPlate || v.plate || c?.custom_plate || '',
+    model: matched?.model || v.model || '',
+    brand: matched?.brand || v.brand || '',
+    type: matched?.type || v.type || '',
+    notes: matched?.notes || v.notes || c?.notes || ''
+  };
+}
+
+function updateVehicleModelDisplay() {
+  const imgEl = document.getElementById('modeloImg');
+  const phEl = document.getElementById('modeloPlaceholder');
+  const badgeEl = document.getElementById('modeloBadge');
+  if (!imgEl) return;
+
+  const cavaloInfo = getActiveCavaloInfo();
+  const resolved = resolveModelImage(currentMode, cavaloInfo, currentModelChoice);
+
+  if (resolved) {
+    imgEl.src = '/imagens/' + encodeURIComponent(resolved.file);
+    imgEl.alt = resolved.label;
+    imgEl.style.display = 'block';
+    phEl.style.display = 'none';
+    badgeEl.textContent = '';
+    badgeEl.style.display = 'none';
+    document.getElementById('modeloBox').style.display = 'block';
+  } else {
+    imgEl.src = '';
+    imgEl.style.display = 'none';
+    phEl.style.display = 'none';
+    badgeEl.textContent = '';
+    badgeEl.style.display = 'none';
+    document.getElementById('modeloBox').style.display = 'none';
+  }
+}
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function load() {
+  try {
+    const [slotsData, vehiclesData] = await Promise.all([
+      fetch('/api/slots').then(r => r.json()),
+      fetch('/api/vehicles').then(r => r.json())
+    ]);
+    slots = slotsData;
+    vehicles = vehiclesData;
+    renderMap();
+    renderStats();
+  } catch (err) {
+    console.error('Erro ao carregar dados:', err);
+  }
+}
+
+function renderStats() {
+  const occ = slots.filter(s => s.current).length;
+  const free = slots.length - occ;
+  const borrOcc = slots.filter(s => s.is_borracharia && s.current).length;
+  document.getElementById('statsChips').innerHTML = `
+    <span class="chip">Total: <b>${slots.length} vagas</b></span>
+    <span class="chip"><i class="dot occ"></i> <b>${occ}</b> ocupadas</span>
+    <span class="chip"><i class="dot free"></i> <b>${free}</b> livres</span>
+    <span class="chip" style="background:#fff7ed;border-color:#fed7aa;color:#9a3412">
+      <i class="dot borr"></i> <b>${borrOcc}/2</b> Borracharia
+    </span>
+  `;
+}
+
+function renderMap() {
+  const mapEl = document.getElementById('map');
+  mapEl.innerHTML = slots.map(s => {
+    const c = s.current;
+    const isBorr = s.is_borracharia;
+    let label = s.code;
+    let title = `Vaga ${s.code} · ${s.zone}`;
+
+    const primaryPlate = c?.vehicle?.plate || c?.custom_plate || '';
+    const trailerPlate = c?.trailer?.plate || c?.custom_trailer || '';
+    const isConjunto = c?.mode === 'conjunto' && Boolean(trailerPlate);
+    const displayPlate = isConjunto ? `${primaryPlate} + ${trailerPlate}` : primaryPlate;
+    const vehicleModeLabel = isConjunto ? 'Conjunto' : 'Veículo desatrelado';
+    const typeIcon = isConjunto ? '🔗' : '🚛';
+
+    if (isBorr) {
+      title = `🛞 Vaga ${s.code} — Borracharia`;
+      label = s.code;
+      if (c && displayPlate) title += `\n${vehicleModeLabel}: ${displayPlate}\nOperação: ${c.operation}`;
+    } else if (c && displayPlate) {
+      label = s.code;
+      title += `\n${vehicleModeLabel}: ${displayPlate}\nOperação: ${c.operation}`;
+    }
+
+    const cls = [
+      'slot',
+      c ? 'occupied' : '',
+      isBorr ? 'borracharia' : ''
+    ].filter(Boolean).join(' ');
+
+    const hoverCard = c && displayPlate
+      ? `<span class="slot-hover-card"><strong>${vehicleModeLabel}</strong>${isConjunto
+        ? `<span>Cavalo: ${esc(primaryPlate)}</span><span>Carreta: ${esc(trailerPlate)}</span>`
+        : `<span>Placa: ${esc(primaryPlate)}</span>`}<small>${esc(c.operation || 'Operação não informada')}</small></span>`
+      : '';
+
+    return `<button id="slot-${s.id}"
+      class="${cls}"
+      style="left:${s.x}%;top:${s.y}%"
+      onclick="onSlotClick('${s.id}')"
+      data-id="${s.id}"
+      aria-label="${esc(title)}"
+    ><span class="slot-code">${esc(label)}</span>${c ? `<span class="slot-type-icon" aria-hidden="true">${typeIcon}</span>` : ''}${hoverCard}</button>`;
+  }).join('');
+
+  if (isCalibrating) attachDragEvents();
+}
+
+function onSlotClick(id) {
+  if (isCalibrating) return;
+  openModal(id);
+}
+
+function filterMap(query) {
+  const q = query.trim().toUpperCase();
+  document.querySelectorAll('.slot').forEach(el => el.classList.remove('highlight'));
+  if (!q) return;
+
+  const match = slots.find(s => {
+    const codeMatch = s.code.toUpperCase().includes(q);
+    const plateMatch = s.current?.vehicle?.plate?.toUpperCase().includes(q) || s.current?.trailer?.plate?.toUpperCase().includes(q);
+    return codeMatch || plateMatch;
+  });
+
+  if (match) {
+    const el = document.getElementById(`slot-${match.id}`);
+    if (el) {
+      el.classList.add('highlight');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
+  }
+}
+
+// ABERTURA DA JANELA DE DETALHES E CADASTRO
+async function openModal(id) {
+  activeSlot = slots.find(s => s.id === id);
+  if (!activeSlot) return;
+
+  const c = activeSlot.current;
+  const isBorr = activeSlot.is_borracharia;
+
+  // Header
+  document.getElementById('modalSubtitle').textContent = `Pátio Jaraguá · Vaga ${activeSlot.code}`;
+
+  // Seção 1: Dados da vaga
+  document.getElementById('valVaga').textContent = activeSlot.code;
+  document.getElementById('valPatio').textContent = 'Pátio Jaraguá';
+
+  const pill = document.getElementById('valStatusPill');
+  const pillText = document.getElementById('valStatusText');
+  if (isBorr) {
+    pill.className = 'status-pill borr';
+    pillText.textContent = c ? 'Borracharia (Ocupada)' : 'Borracharia (Livre)';
+  } else if (c) {
+    pill.className = 'status-pill occ';
+    pillText.textContent = 'Ocupada';
+  } else {
+    pill.className = 'status-pill free';
+    pillText.textContent = 'Livre';
+  }
+
+  let opDefault = isBorr ? 'Borracharia / Pneus' : (currentUser?.defaultOp === 'Diversos' ? 'Diversos' : 'Correios');
+  const op = c ? c.operation : opDefault;
+  document.getElementById('valOperacao').textContent = op;
+  document.getElementById('editOperacao').value = op;
+
+  if (c && c.entered_at) {
+    document.getElementById('valEntrada').textContent = formatDateTime(c.entered_at);
+    document.getElementById('valTempo').textContent = timeAgo(c.entered_at);
+  } else {
+    document.getElementById('valEntrada').textContent = '—';
+    document.getElementById('valTempo').textContent = '—';
+  }
+
+  // Preenche dados do veículo existente ou defaults
+  // Vaga livre começa sem modelo/imagem e sem descrição pré-preenchida.
+  const mode = c ? c.mode : 'isolated';
+  setMode(mode);
+
+  if (c) {
+    document.getElementById('btnRelease').style.display = 'inline-flex';
+    document.getElementById('editDriver').value = c.driver || '';
+    document.getElementById('editNotes').value = c.notes || '';
+
+    // Preenche Cavalo / Placa 1
+    const v = c.vehicle || {};
+    const plate1 = v.plate || c.custom_plate || '';
+    document.getElementById('inputPlate1').value = plate1;
+    document.getElementById('vehicleDbId').value = v.id || '';
+    updateCardDetails('vehicle', v.type || 'Cavalo', v.status || 'Em atividade', v.chassis || 'Consultado no BD', v.baseDestino || '—');
+
+    // Preenche Carreta / Placa 2
+    if (c.mode === 'conjunto') {
+      const t = c.trailer || {};
+      const plate2 = t.plate || c.custom_trailer || '';
+      document.getElementById('inputPlate2').value = plate2;
+      document.getElementById('trailerDbId').value = t.id || '';
+      updateCardDetails('trailer', t.type || 'Carreta', t.status || 'Em atividade', t.chassis || 'Consultado no BD', t.baseDestino || '—');
+    } else {
+      clearCard('trailer');
+    }
+  } else {
+    document.getElementById('btnRelease').style.display = 'none';
+    document.getElementById('editDriver').value = '';
+    document.getElementById('editNotes').value = '';
+    document.getElementById('inputPlate1').value = '';
+    document.getElementById('vehicleDbId').value = '';
+    clearCard('vehicle', true);
+    clearCard('trailer', true);
+  }
+
+  // Identifica o modelo do cavalo para exibir a imagem correspondente no card
+  currentModelChoice = null;
+  if (c) {
+    const v = c.vehicle || {};
+    const text = [v.model || '', v.brand || '', v.type || '', v.plate || c.custom_plate || '', c.notes || ''].join(' ').toUpperCase();
+    if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044')) {
+      currentModelChoice = 'Axor';
+    } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('G380') || text.includes('G420') || text.includes('P360') || text.includes('G370')) {
+      currentModelChoice = 'Scania';
+    } else if (text.includes('19360') || text.includes('19.360') || text.includes('VOLKS') || text.includes('VW')) {
+      currentModelChoice = 'Volks';
+    }
+  }
+  updateModelChips();
+  updateVehicleModelDisplay();
+
+  // Carrega histórico da vaga para atualizar a Seção 3
+  await loadSlotHistory(activeSlot.id);
+
+  // Exibe a modal
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('historyTimelinePanel').classList.remove('show');
+}
+
+// TROCA DE MODO: VEÍCULO DESATRELADO vs CONJUNTO vs VAGA LIVRE
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('tabIsolated').classList.toggle('active', mode === 'isolated');
+  document.getElementById('tabConjunto').classList.toggle('active', mode === 'conjunto');
+  document.getElementById('tabEmpty').classList.toggle('active', mode === 'empty');
+
+  const headingTitle = document.getElementById('vehicleSectionTitle');
+  const boxHeader = document.getElementById('vehicleBoxHeader');
+  const platesGrid = document.getElementById('platesGrid');
+  const cardTrailer = document.getElementById('unitCardTrailer');
+  const labelPlate1 = document.getElementById('labelPlate1');
+  const extraFields = document.getElementById('extraFieldsContainer');
+
+  if (mode === 'empty') {
+    headingTitle.textContent = 'Desocupar Vaga';
+    boxHeader.textContent = 'A vaga será marcada como livre e disponível';
+    platesGrid.style.display = 'none';
+    extraFields.style.display = 'none';
+  } else if (mode === 'conjunto') {
+    headingTitle.textContent = 'Conjunto cadastrado pelas duas placas';
+    boxHeader.textContent = 'Conjunto — cavalo mecânico + carreta';
+    platesGrid.style.display = 'grid';
+    platesGrid.className = 'plates-registration-grid two-cols';
+    cardTrailer.style.display = 'block';
+    labelPlate1.textContent = 'Placa Cavalo';
+    extraFields.style.display = 'block';
+  } else {
+    // isolated (Veículo desatrelado - preenchimento único de placa)
+    headingTitle.textContent = 'Veículo desatrelado cadastrado pela placa';
+    boxHeader.textContent = 'Veículo desatrelado — cavalo ou carreta';
+    platesGrid.style.display = 'grid';
+    platesGrid.className = 'plates-registration-grid';
+    cardTrailer.style.display = 'none';
+    labelPlate1.textContent = 'Placa';
+    extraFields.style.display = 'block';
+  }
+  updateVehicleModelDisplay();
+}
+
+function onOpChange(val) {
+  document.getElementById('valOperacao').textContent = val;
+}
+
+function updateCardDetails(unit, tipo, status, chassi, base) {
+  const prefix = unit === 'vehicle' ? 'card1' : 'card2';
+  document.getElementById(`${prefix}Tipo`).textContent = tipo || 'Cavalo';
+  document.getElementById(`${prefix}Status`).textContent = status || 'Em atividade';
+  document.getElementById(`${prefix}Chassi`).textContent = chassi || 'Consultado no BD';
+  document.getElementById(`${prefix}Base`).textContent = base || '—';
+}
+
+function clearCard(unit, emptyState = false) {
+  const prefix = unit === 'vehicle' ? 'card1' : 'card2';
+  document.getElementById(`${prefix}Tipo`).textContent = emptyState ? '—' : (unit === 'vehicle' ? 'Cavalo' : 'Carreta');
+  document.getElementById(`${prefix}Status`).textContent = emptyState ? '—' : 'Em atividade';
+  document.getElementById(`${prefix}Chassi`).textContent = emptyState ? '—' : 'Consultado no BD';
+  document.getElementById(`${prefix}Base`).textContent = '—';
+}
+
+// AUTOCOMPLETE DE PLACAS EM TEMPO REAL
+function onPlateInput(unit, text) {
+  const q = text.trim().toUpperCase();
+  const resultsEl = document.getElementById(unit === 'vehicle' ? 'resultsVehicle' : 'resultsTrailer');
+
+  // Atualiza campo com placa maiúscula
+  if (unit === 'vehicle') document.getElementById('inputPlate1').value = q;
+  else document.getElementById('inputPlate2').value = q;
+
+  if (unit === 'vehicle') {
+    const matched = vehicles.find(v => v.plate.toUpperCase() === q);
+    if (matched) {
+      const text = [matched.model || '', matched.brand || '', matched.type || '', q].join(' ').toUpperCase();
+      if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044')) {
+        currentModelChoice = 'Axor';
+      } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('G380') || text.includes('G420') || text.includes('P360') || text.includes('G370')) {
+        currentModelChoice = 'Scania';
+      } else if (text.includes('19360') || text.includes('19.360') || text.includes('VOLKS') || text.includes('VW')) {
+        currentModelChoice = 'Volks';
+      }
+      updateModelChips();
+    }
+    updateVehicleModelDisplay();
+  }
+
+  if (!q) {
+    resultsEl.classList.remove('show');
+    clearCard(unit);
+    document.getElementById(unit === 'vehicle' ? 'vehicleDbId' : 'trailerDbId').value = '';
+    if (unit === 'vehicle') updateVehicleModelDisplay();
+    return;
+  }
+
+  // Procura no array de veículos
+  const matches = vehicles.filter(v => v.plate.toUpperCase().includes(q) || (v.type && v.type.toUpperCase().includes(q))).slice(0, 7);
+
+  let html = matches.map(v => `
+    <div class="autocomplete-item" onclick="selectPlate('${unit}', '${v.id}', '${v.plate}', '${v.type || ''}', '${v.status || ''}', '${v.chassis || ''}', '${v.baseDestino || ''}')">
+      <div>
+        <b style="color:#0f273d">${v.plate}</b>
+        <span style="color:#64748b;margin-left:6px">${v.type || ''}</span>
+      </div>
+      <span style="font-size:11px;color:#94a3b8">${v.yard || ''}</span>
+    </div>
+  `).join('');
+
+  // Opção para manter placa digitada avulsa
+  html += `
+    <div class="autocomplete-item" style="background:#f8fafc;border-top:1px dashed #cbd5e1" onclick="selectPlate('${unit}', '', '${q}', 'Veículo cadastrado', 'Em atividade', 'Placa avulsa', '—')">
+      <div>
+        <b style="color:#ea580c">+ Usar placa avulsa:</b> ${q}
+      </div>
+      <span style="font-size:11px;color:#94a3b8">Digitação</span>
+    </div>
+  `;
+
+  resultsEl.innerHTML = html;
+  resultsEl.classList.add('show');
+}
+
+function selectPlate(unit, id, plate, tipo, status, chassi, base) {
+  const inputEl = document.getElementById(unit === 'vehicle' ? 'inputPlate1' : 'inputPlate2');
+  const dbIdEl = document.getElementById(unit === 'vehicle' ? 'vehicleDbId' : 'trailerDbId');
+  const resultsEl = document.getElementById(unit === 'vehicle' ? 'resultsVehicle' : 'resultsTrailer');
+
+  inputEl.value = plate;
+  dbIdEl.value = id || '';
+  resultsEl.classList.remove('show');
+
+  updateCardDetails(unit, tipo || (unit === 'vehicle' ? 'Cavalo' : 'Carreta'), status || 'Em atividade', chassi || 'Consultado no BD', base || '—');
+
+  if (unit === 'vehicle') {
+    const matched = vehicles.find(v => String(v.id) === String(id) || v.plate.toUpperCase() === plate.toUpperCase());
+    const text = [matched?.model || '', matched?.brand || '', matched?.type || '', tipo || '', plate].join(' ').toUpperCase();
+    if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044')) {
+      currentModelChoice = 'Axor';
+    } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('G380') || text.includes('G420') || text.includes('P360') || text.includes('G370')) {
+      currentModelChoice = 'Scania';
+    } else if (text.includes('19360') || text.includes('19.360') || text.includes('VOLKS') || text.includes('VW')) {
+      currentModelChoice = 'Volks';
+    }
+    updateModelChips();
+    updateVehicleModelDisplay();
+  }
+}
+
+// CARREGAMENTO DO HISTÓRICO DA VAGA (SEÇÃO 3)
+async function loadSlotHistory(slotId) {
+  try {
+    const list = await fetch(`/api/slots/${slotId}/history`).then(r => r.json());
+    currentSlotHistory = list;
+
+    // Total ocupações
+    document.getElementById('histTotalOcupacoes').textContent = `${list.length} movimentações`;
+
+    // Última saída (pega o primeiro registro que tiver exited_at)
+    const lastExit = list.find(h => h.exited_at);
+    document.getElementById('histUltimaSaida').textContent = lastExit ? formatDateTime(lastExit.exited_at) : 'Nenhuma saída registrada';
+
+    // Última placa
+    let lastPlate = '—';
+    if (list.length > 0) {
+      const h0 = list[0];
+      const p = h0.vehicle?.plate || h0.custom_plate;
+      const t = h0.trailer?.plate || h0.custom_trailer;
+      lastPlate = t ? `${p} + ${t}` : (p || '—');
+    }
+    document.getElementById('histUltimaPlaca').textContent = lastPlate;
+
+    // Timeline interna completa
+    const timelineEl = document.getElementById('historyTimelinePanel');
+    if (!list.length) {
+      timelineEl.innerHTML = '<div style="color:#94a3b8;font-size:12px;padding:6px">Nenhum registro anterior de ocupação nesta vaga.</div>';
+    } else {
+      timelineEl.innerHTML = list.map(h => {
+        const v = h.vehicle || {};
+        const t = h.trailer || {};
+        const p = v.plate || h.custom_plate || '—';
+        const trail = t.plate || h.custom_trailer || '';
+        const plateText = trail ? `${p} + ${trail}` : p;
+        return `
+          <div class="timeline-item">
+            <strong>${esc(formatDateTime(h.entered_at))} ${h.exited_at ? `até ${formatDateTime(h.exited_at)}` : '(Ocupação Atual)'}</strong>
+            <small>Placa: <b>${esc(plateText)}</b> · Operação: ${esc(h.operation)} · ${h.mode === 'conjunto' ? 'Conjunto' : 'Veículo desatrelado'}</small>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (err) {
+    console.error('Erro ao buscar histórico:', err);
+  }
+}
+
+function toggleHistoryTimeline() {
+  const panel = document.getElementById('historyTimelinePanel');
+  const btn = document.getElementById('btnToggleHistory');
+  const isOpen = panel.classList.toggle('show');
+  btn.textContent = isOpen ? 'Ocultar histórico' : 'Ver histórico completo';
+}
+
+// SALVAR CADASTRO / ALOCAÇÃO
+async function saveOccupancy() {
+  if (!activeSlot) return;
+
+  const mode = currentMode;
+  const operation = document.getElementById('editOperacao').value || 'Diversos';
+  const driver = document.getElementById('editDriver').value.trim() || null;
+  const notes = document.getElementById('editNotes').value.trim() || null;
+
+  const vehicleId = document.getElementById('vehicleDbId').value || null;
+  const plate1 = document.getElementById('inputPlate1').value.trim().toUpperCase() || null;
+
+  const trailerId = document.getElementById('trailerDbId').value || null;
+  const plate2 = document.getElementById('inputPlate2').value.trim().toUpperCase() || null;
+
+  if (mode === 'isolated' && !vehicleId && !plate1) {
+    alert('Por favor, informe a placa do veículo.');
+    document.getElementById('inputPlate1').focus();
+    return;
+  }
+
+  if (mode === 'conjunto') {
+    if (!vehicleId && !plate1) {
+      alert('Por favor, informe a placa do cavalo.');
+      document.getElementById('inputPlate1').focus();
+      return;
+    }
+    if (!trailerId && !plate2) {
+      alert('Por favor, informe a placa da carreta.');
+      document.getElementById('inputPlate2').focus();
+      return;
+    }
+  }
+
+  const payload = {
+    mode,
+    operation,
+    vehicleId,
+    trailerId: mode === 'conjunto' ? trailerId : null,
+    customPlate: plate1,
+    customTrailer: mode === 'conjunto' ? plate2 : null,
+    driver,
+    notes,
+    enteredAt: activeSlot.current?.entered_at || new Date().toISOString()
+  };
+
+  try {
+    const res = await fetch(`/api/slots/${activeSlot.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.error || 'Erro ao salvar cadastro.');
+      return;
+    }
+    await load();
+    openModal(activeSlot.id);
+  } catch (err) {
+    alert('Erro de conexão ao salvar.');
+  }
+}
+
+// LIBERAR VAGA
+async function releaseSlot() {
+  if (!activeSlot) return;
+  if (!confirm(`Deseja realmente liberar e desocupar a Vaga ${activeSlot.code}?`)) return;
+
+  try {
+    const res = await fetch(`/api/slots/${activeSlot.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'empty' })
+    });
+    if (!res.ok) {
+      alert('Erro ao liberar vaga.');
+      return;
+    }
+    await load();
+    openModal(activeSlot.id);
+  } catch (err) {
+    alert('Erro de conexão.');
+  }
+}
+
+// CALIBRAÇÃO / ARRASTE DE VAGAS EM TEMPO REAL
+function toggleCalibration() {
+  isCalibrating = !isCalibrating;
+  const btn = document.getElementById('calibBtn');
+  btn.classList.toggle('active', isCalibrating);
+  btn.textContent = isCalibrating ? '✓ Concluir Ajustes' : '⚙ Ajustar Vagas';
+  renderMap();
+}
+
+function attachDragEvents() {
+  const mapEl = document.getElementById('map');
+  const buttons = mapEl.querySelectorAll('.slot');
+
+  buttons.forEach(btn => {
+    btn.onmousedown = function(e) {
+      if (!isCalibrating) return;
+      e.preventDefault();
+      const slotId = btn.dataset.id;
+      btn.classList.add('dragging');
+
+      function onMouseMove(moveEvent) {
+        const rect = mapEl.getBoundingClientRect();
+        const x = Math.max(0, Math.min(100, ((moveEvent.clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((moveEvent.clientY - rect.top) / rect.height) * 100));
+        btn.style.left = x.toFixed(1) + '%';
+        btn.style.top = y.toFixed(1) + '%';
+      }
+
+      function onMouseUp(upEvent) {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        btn.classList.remove('dragging');
+
+        const rect = mapEl.getBoundingClientRect();
+        const finalX = parseFloat((((upEvent.clientX - rect.left) / rect.width) * 100).toFixed(1));
+        const finalY = parseFloat((((upEvent.clientY - rect.top) / rect.height) * 100).toFixed(1));
+
+        // Salva imediatamente no banco de dados
+        fetch(`/api/slots/${slotId}/position`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ x: finalX, y: finalY })
+        }).then(r => r.json()).then(data => {
+          const s = slots.find(x => x.id === slotId);
+          if (s) { s.x = finalX; s.y = finalY; }
+        });
+      }
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    };
+  });
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const ano = d.getFullYear();
+  const hor = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${dia}/${mes}/${ano} às ${hor}:${min}`;
+}
+
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 0) return 'recente';
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}min`;
+  const hrs = Math.floor(mins / 60);
+  const remMins = mins % 60;
+  return `${hrs}h ${remMins}min`;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.autocomplete-wrap')) {
+    document.querySelectorAll('.autocomplete-results').forEach(el => el.classList.remove('show'));
+  }
+});
+
+load();
+</script>
+</body>
+</html>
