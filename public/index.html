@@ -2300,8 +2300,8 @@ function setSearchQuery(val) {
 async function load() {
   try {
     const [slotsData, vehiclesData] = await Promise.all([
-      fetch('/api/slots').then(r => r.json()),
-      fetch('/api/vehicles').then(r => r.json())
+      fetchJson('/api/slots'),
+      fetchJson('/api/vehicles')
     ]);
     slots = slotsData;
     vehicles = vehiclesData;
@@ -2311,6 +2311,27 @@ async function load() {
     renderBorrView();
   } catch (err) {
     console.error('Erro ao carregar dados:', err);
+    document.getElementById('statsChips').innerHTML = `
+      <span class="chip" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b">
+        ⚠ Não foi possível carregar as vagas
+      </span>
+      <button class="btn small" type="button" onclick="load()">Tentar novamente</button>`;
+    document.getElementById('map').innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#991b1b;font-weight:700">
+        Verifique a conexão com o banco e tente novamente.
+      </div>`;
+  }
+}
+
+async function fetchJson(url, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+    if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+    return await response.json();
+  } finally {
+    clearTimeout(timer);
   }
 }
 

@@ -2,6 +2,7 @@ import json
 import os
 import sqlite3
 import re
+import time
 from html import unescape
 from html.parser import HTMLParser
 from datetime import datetime
@@ -17,6 +18,8 @@ DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
 APP_DB = Path(os.environ['VAGAS_PATIO_DB_PATH']) if os.environ.get('VAGAS_PATIO_DB_PATH') else SOURCE_DB.parent / 'vagas_patio.db'
 PORT = int(os.environ.get('PORT', os.environ.get('VAGAS_PATIO_PORT', '8787')))
 HOST = os.environ.get('HOST', '0.0.0.0')
+VEHICLE_CACHE = {'at': 0.0, 'rows': None}
+SHEET_CACHE = {'signature': None, 'rows': None}
 
 SLOTS = [
     # 1. BORRACHARIA (Vagas 01 e 02) — Baias em frente à oficina
@@ -131,26 +134,27 @@ def init_db():
     conn.close()
 
 def vehicle_rows():
+    if VEHICLE_CACHE['rows'] is not None and time.monotonic() - VEHICLE_CACHE['at'] < 30:
+        return VEHICLE_CACHE['rows']
+    rows = []
     if DATABASE_URL:
         rows = postgres_vehicle_rows()
-        if rows:
-            return rows
-    sheet_rows = spreadsheet_vehicle_rows()
-    if sheet_rows:
-        return sheet_rows
-    if not SOURCE_DB.exists(): return []
-    conn = db(SOURCE_DB, True)
-    rows = conn.execute("""
-        SELECT v.id, v.plate, v.type, v.yard, v.chassis, v.status, v.entryTime, v.exitTime, v.base, v.baseDestino,
-               v.entregar_diversos, v.entregar_correios,
-               c.brand, c.model
-        FROM vehicles v
-        LEFT JOIN vehicle_catalog c ON UPPER(v.plate) = UPPER(c.plate)
-        WHERE COALESCE(v.status,'') <> 'Liberado'
-        ORDER BY v.plate
-    """).fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+    if not rows:
+        rows = spreadsheet_vehicle_rows()
+    if not rows and SOURCE_DB.exists():
+        conn = db(SOURCE_DB, True)
+        rows = [dict(r) for r in conn.execute("""
+            SELECT v.id, v.plate, v.type, v.yard, v.chassis, v.status, v.entryTime, v.exitTime, v.base, v.baseDestino,
+                   v.entregar_diversos, v.entregar_correios,
+                   c.brand, c.model
+            FROM vehicles v
+            LEFT JOIN vehicle_catalog c ON UPPER(v.plate) = UPPER(c.plate)
+            WHERE COALESCE(v.status,'') <> 'Liberado'
+            ORDER BY v.plate
+        """).fetchall()]
+        conn.close()
+    VEHICLE_CACHE.update({'at': time.monotonic(), 'rows': rows})
+    return rows
 
 def postgres_vehicle_rows():
     try:
@@ -210,6 +214,9 @@ def spreadsheet_vehicle_rows():
     if not VEHICLE_SHEET.exists():
         return []
     try:
+        signature = (VEHICLE_SHEET.stat().st_mtime_ns, VEHICLE_SHEET.stat().st_size)
+        if SHEET_CACHE['signature'] == signature and SHEET_CACHE['rows'] is not None:
+            return SHEET_CACHE['rows']
         parser = HtmlSpreadsheetParser()
         parser.feed(VEHICLE_SHEET.read_bytes().decode('cp1252', errors='replace'))
         if len(parser.rows) < 3:
@@ -251,6 +258,7 @@ def spreadsheet_vehicle_rows():
                 'operation': value(row, 'OPERAÇÃO'),
                 'statusPrincipal': value(row, 'STATUS PRINCIPAL')
             })
+        SHEET_CACHE.update({'signature': signature, 'rows': result})
         return result
     except Exception as exc:
         print(f'Falha ao ler planilha de veículos: {exc}')
