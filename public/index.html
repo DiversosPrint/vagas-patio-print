@@ -1755,18 +1755,14 @@
             <input type="hidden" id="vehicleDbId" value="">
           </div>
 
-          <div class="model-select-row" style="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-            <span style="font-size:11px;color:#64748b;font-weight:600">Modelo:</span>
-            <button type="button" class="btn-model-chip" id="chipAxor" onclick="selectModelChoice('Axor')">Axor</button>
-            <button type="button" class="btn-model-chip" id="chipVolks" onclick="selectModelChoice('Volks')">Volks / 19360</button>
-            <button type="button" class="btn-model-chip" id="chipScania" onclick="selectModelChoice('Scania')">Scania</button>
-            <button type="button" class="btn-model-chip" id="chipCarreta" onclick="selectModelChoice('Carreta')">Carreta</button>
-          </div>
-
           <div class="unit-details-grid">
             <div class="detail-item">
               <span>Tipo</span>
               <strong id="card1Tipo">Cavalo</strong>
+            </div>
+            <div class="detail-item">
+              <span>Modelo</span>
+              <strong id="card1Modelo">—</strong>
             </div>
             <div class="detail-item">
               <span>Status</span>
@@ -1802,6 +1798,10 @@
             <div class="detail-item">
               <span>Tipo</span>
               <strong id="card2Tipo">Carreta</strong>
+            </div>
+            <div class="detail-item">
+              <span>Modelo</span>
+              <strong id="card2Modelo">—</strong>
             </div>
             <div class="detail-item">
               <span>Status</span>
@@ -1945,9 +1945,7 @@ function resolveModelImage(mode, cavaloInfo, explicitChoice) {
   // A imagem só aparece depois que uma placa real foi informada/localizada.
   if (mode === 'empty' || !cavaloInfo?.plate) return null;
 
-  // A placa preenchida não escolhe o modelo automaticamente.
-  // A imagem só aparece quando o usuário seleciona um modelo explicitamente.
-  const modelKey = explicitChoice;
+  const modelKey = explicitChoice || detectModelChoice(cavaloInfo);
   if (!modelKey) return null;
 
   // DIRETRIZES DO USUÁRIO:
@@ -1978,6 +1976,15 @@ function resolveModelImage(mode, cavaloInfo, explicitChoice) {
     // Axor ou default para cavalo
     return { file: 'Axor 2038.webp', label: 'Cavalo Axor 2038' };
   }
+}
+
+function detectModelChoice(info = {}) {
+  const text = [info.model || '', info.brand || '', info.type || '', info.plate || '', info.vehicle_kind || ''].join(' ').toUpperCase();
+  if (text.includes('CARRETA') || text.includes('SEMI REBOQUE') || text.includes('SEMI-REBOQUE') || text.includes('SR/') || text.includes('SRF') || text.includes('RANDON') || text.includes('FACCHINI')) return 'Carreta';
+  if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044') || text.includes('2544')) return 'Axor';
+  if (text.includes('SCANIA') || text.includes('R440') || text.includes('R 440') || text.includes('G380') || text.includes('G 380') || text.includes('G420') || text.includes('P360') || text.includes('P 360') || text.includes('G370') || text.includes('G 370')) return 'Scania';
+  if (text.includes('19360') || text.includes('19.360') || text.includes('19 360') || text.includes('VOLKS') || text.includes('VW') || text.includes('CONSTELLATION')) return 'Volks';
+  return null;
 }
 
 function selectModelChoice(choice) {
@@ -2498,7 +2505,7 @@ async function openModal(id) {
     const plate1 = v.plate || c.custom_plate || '';
     document.getElementById('inputPlate1').value = plate1;
     document.getElementById('vehicleDbId').value = v.id || '';
-    updateCardDetails('vehicle', v.type || 'Cavalo', v.status || 'Em atividade', v.chassis || 'Consultado no BD', v.baseDestino || '—');
+    updateCardDetails('vehicle', v.type || 'Cavalo', 'Em atividade', v.chassis || 'Consultado no BD', v.baseDestino || '—', v.model || '—');
 
     // Preenche Carreta / Placa 2
     if (c.mode === 'conjunto') {
@@ -2506,7 +2513,7 @@ async function openModal(id) {
       const plate2 = t.plate || c.custom_trailer || '';
       document.getElementById('inputPlate2').value = plate2;
       document.getElementById('trailerDbId').value = t.id || '';
-      updateCardDetails('trailer', t.type || 'Carreta', t.status || 'Em atividade', t.chassis || 'Consultado no BD', t.baseDestino || '—');
+      updateCardDetails('trailer', t.type || 'Carreta', 'Em atividade', t.chassis || 'Consultado no BD', t.baseDestino || '—', t.model || '—');
     } else {
       clearCard('trailer');
     }
@@ -2596,10 +2603,11 @@ function onOpChange(val) {
   document.getElementById('valOperacao').textContent = val;
 }
 
-function updateCardDetails(unit, tipo, status, chassi, base) {
+function updateCardDetails(unit, tipo, status, chassi, base, modelo) {
   const prefix = unit === 'vehicle' ? 'card1' : 'card2';
   document.getElementById(`${prefix}Tipo`).textContent = tipo || 'Cavalo';
-  document.getElementById(`${prefix}Status`).textContent = status || 'Em atividade';
+  document.getElementById(`${prefix}Status`).textContent = 'Em atividade';
+  document.getElementById(`${prefix}Modelo`).textContent = modelo || '—';
   document.getElementById(`${prefix}Chassi`).textContent = chassi || 'Consultado no BD';
   document.getElementById(`${prefix}Base`).textContent = base || '—';
 }
@@ -2607,6 +2615,7 @@ function updateCardDetails(unit, tipo, status, chassi, base) {
 function clearCard(unit, emptyState = false) {
   const prefix = unit === 'vehicle' ? 'card1' : 'card2';
   document.getElementById(`${prefix}Tipo`).textContent = emptyState ? '—' : (unit === 'vehicle' ? 'Cavalo' : 'Carreta');
+  document.getElementById(`${prefix}Modelo`).textContent = '—';
   document.getElementById(`${prefix}Status`).textContent = emptyState ? '—' : 'Em atividade';
   document.getElementById(`${prefix}Chassi`).textContent = emptyState ? '—' : 'Consultado no BD';
   document.getElementById(`${prefix}Base`).textContent = '—';
@@ -2623,8 +2632,12 @@ function onPlateInput(unit, text) {
   updatePlateVisual(unit);
 
   if (unit === 'vehicle') {
-    currentModelChoice = null;
+    const matched = vehicles.find(v => v.plate.toUpperCase() === q);
+    currentModelChoice = matched ? detectModelChoice(matched) : null;
     updateModelChips();
+    if (matched) {
+      updateCardDetails('vehicle', matched.type, 'Em atividade', matched.chassis, matched.baseDestino, matched.model);
+    }
     updateVehicleModelDisplay();
   }
 
@@ -2673,10 +2686,11 @@ function selectPlate(unit, id, plate, tipo, status, chassi, base) {
   dbIdEl.value = id || '';
   resultsEl.classList.remove('show');
 
-  updateCardDetails(unit, tipo || (unit === 'vehicle' ? 'Cavalo' : 'Carreta'), status || 'Em atividade', chassi || 'Consultado no BD', base || '—');
+  const matched = vehicles.find(v => String(v.id) === String(id) || v.plate.toUpperCase() === plate.toUpperCase());
+  updateCardDetails(unit, tipo || (unit === 'vehicle' ? 'Cavalo' : 'Carreta'), 'Em atividade', chassi || 'Consultado no BD', base || '—', matched?.model || '—');
 
   if (unit === 'vehicle') {
-    currentModelChoice = null;
+    currentModelChoice = detectModelChoice(matched || { type: tipo, plate });
     updateModelChips();
     updatePlateVisual('vehicle');
     updateVehicleModelDisplay();
