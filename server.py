@@ -1,6 +1,9 @@
 import json
 import os
 import sqlite3
+import re
+from html import unescape
+from html.parser import HTMLParser
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -9,8 +12,10 @@ from urllib.parse import urlparse, unquote
 ROOT = Path(__file__).resolve().parent
 PUBLIC = ROOT / 'public'
 SOURCE_DB = Path(os.environ.get('PATIO_DB_PATH', r'C:\Users\Pixel Midia 3D\controle-patio-print\database\patio.db'))
+VEHICLE_SHEET = Path(os.environ.get('PATIO_VEICULOS_PATH', str(ROOT / 'data' / 'veiculos.xls')))
 APP_DB = Path(os.environ['VAGAS_PATIO_DB_PATH']) if os.environ.get('VAGAS_PATIO_DB_PATH') else SOURCE_DB.parent / 'vagas_patio.db'
-PORT = int(os.environ.get('VAGAS_PATIO_PORT', '8787'))
+PORT = int(os.environ.get('PORT', os.environ.get('VAGAS_PATIO_PORT', '8787')))
+HOST = os.environ.get('HOST', '0.0.0.0')
 
 SLOTS = [
     # 1. BORRACHARIA (Vagas 01 e 02) — Baias em frente à oficina
@@ -125,6 +130,9 @@ def init_db():
     conn.close()
 
 def vehicle_rows():
+    sheet_rows = spreadsheet_vehicle_rows()
+    if sheet_rows:
+        return sheet_rows
     if not SOURCE_DB.exists(): return []
     conn = db(SOURCE_DB, True)
     rows = conn.execute("""
@@ -143,6 +151,86 @@ def vehicle_map(): return {str(v['id']): v for v in vehicle_rows()}
 
 def normalize_plate(value):
     return ''.join(ch for ch in str(value or '').upper() if ch.isalnum())
+
+class HtmlSpreadsheetParser(HTMLParser):
+    """Lê o .xls exportado como tabela HTML, sem depender do Excel no servidor."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.rows = []
+        self.row = None
+        self.cell = None
+        self.text = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'tr':
+            self.row = []
+        elif tag in ('td', 'th') and self.row is not None:
+            self.cell = []
+            self.text = []
+
+    def handle_data(self, data):
+        if self.cell is not None:
+            self.text.append(data)
+
+    def handle_endtag(self, tag):
+        if tag in ('td', 'th') and self.cell is not None:
+            value = unescape(''.join(self.text)).replace('\xa0', ' ').strip()
+            self.row.append(re.sub(r'\s+', ' ', value))
+            self.cell = None
+            self.text = []
+        elif tag == 'tr' and self.row is not None:
+            self.rows.append(self.row)
+            self.row = None
+
+def spreadsheet_vehicle_rows():
+    if not VEHICLE_SHEET.exists():
+        return []
+    try:
+        parser = HtmlSpreadsheetParser()
+        parser.feed(VEHICLE_SHEET.read_bytes().decode('cp1252', errors='replace'))
+        if len(parser.rows) < 3:
+            return []
+
+        headers = [str(v).upper() for v in parser.rows[1]]
+        index = {name: i for i, name in enumerate(headers)}
+        required = ['ID', 'PLACA', 'CHASSI', 'MARCA', 'MODELO', 'TIPO', 'STATUS OPERACIONAL', 'STATUS PRINCIPAL']
+        if any(name not in index for name in required):
+            return []
+
+        def value(row, name):
+            pos = index.get(name)
+            return row[pos].strip() if pos is not None and pos < len(row) and row[pos] else ''
+
+        result = []
+        seen = set()
+        for row in parser.rows[2:]:
+            plate = value(row, 'PLACA').upper()
+            key = normalize_plate(plate)
+            if not key or key in seen or 'PLACA FICT' in plate:
+                continue
+            seen.add(key)
+            result.append({
+                'id': value(row, 'ID') or None,
+                'plate': plate,
+                'type': value(row, 'TIPO'),
+                'yard': value(row, 'UNIDADE') or value(row, 'PONTO DE APOIO'),
+                'chassis': value(row, 'CHASSI'),
+                'status': value(row, 'STATUS OPERACIONAL') or value(row, 'STATUS PRINCIPAL'),
+                'entryTime': None,
+                'exitTime': None,
+                'base': value(row, 'PONTO DE APOIO'),
+                'baseDestino': value(row, 'UNIDADE'),
+                'entregar_diversos': 0,
+                'entregar_correios': 0,
+                'brand': value(row, 'MARCA'),
+                'model': value(row, 'MODELO'),
+                'operation': value(row, 'OPERAÇÃO'),
+                'statusPrincipal': value(row, 'STATUS PRINCIPAL')
+            })
+        return result
+    except Exception as exc:
+        print(f'Falha ao ler planilha de veículos: {exc}')
+        return []
 
 def enriched_slot(slot, vehicles):
     conn = db(APP_DB, True)
@@ -344,6 +432,11 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == '__main__':
     PUBLIC.mkdir(parents=True, exist_ok=True)
     init_db()
-    print(f'Sistema Vagas Pátio Jaraguá: http://localhost:{PORT}')
+    print(f'Sistema Vagas Pátio Jaraguá: http://localhost:{PORT} (e na rede local: http://0.0.0.0:{PORT})')
     print(f'Banco de vagas: {APP_DB}')
-    ThreadingHTTPServer(('127.0.0.1', PORT), Handler).serve_forever()
+    try:
+        ThreadingHTTPServer.allow_reuse_address = True
+        server = ThreadingHTTPServer((HOST, PORT), Handler)
+        server.serve_forever()
+    except Exception as e:
+        print(f'Erro no servidor: {e}', flush=True)
