@@ -2,8 +2,18 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Monitoramento de vagas pátios Print</title>
+
+  <!-- PWA & MOBILE META TAGS -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#064e3b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vagas Print">
+  <link rel="apple-touch-icon" href="/imagens/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/imagens/icon-192.png">
   <style>
     :root {
       --font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -187,6 +197,17 @@
       color: #fff;
       border-color: #d97706;
     }
+    .btn.pwa-install {
+      background: #047857;
+      color: #fff;
+      border-color: #059669;
+      box-shadow: 0 2px 6px rgba(4, 120, 87, 0.35);
+      animation: pwaPulse 2s infinite;
+    }
+    @keyframes pwaPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    }
 
     .page {
       padding: 16px 22px;
@@ -334,6 +355,12 @@
     .slot.highlight {
       animation: slotBlink 1s infinite alternate;
       z-index: 20;
+    }
+    .slot.dimmed {
+      opacity: 0.16;
+      filter: grayscale(100%);
+      pointer-events: none;
+      transition: opacity 0.2s;
     }
     @keyframes slotBlink {
       from { transform: translate(-50%, -50%) scale(1); outline: 3px solid #f59e0b; }
@@ -670,6 +697,64 @@
       font-size: 14px;
       letter-spacing: normal;
     }
+    .plate-visual {
+      width: 158px;
+      min-height: 47px;
+      margin: 4px auto 10px;
+      border-radius: 7px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      font-weight: 900;
+      line-height: 1.05;
+      text-align: center;
+    }
+    .plate-visual .plate-country {
+      width: 100%;
+      padding: 3px 0 2px;
+      font-size: 8px;
+      letter-spacing: 0.2em;
+    }
+    .plate-visual .plate-number {
+      font-size: 18px;
+      letter-spacing: 0.16em;
+    }
+    .plate-visual.plate-cavalo {
+      border: 2px solid #b51223;
+      background: #f8fafc;
+      color: #b51223;
+    }
+    .plate-visual.plate-cavalo .plate-country {
+      background: #123b78;
+      color: #fff;
+    }
+    .plate-visual.plate-mercosul {
+      border: 2px solid #b51223;
+      background: #f8fafc;
+      color: #b51223;
+      justify-content: flex-start;
+    }
+    .plate-visual.plate-mercosul .plate-country {
+      background: #123b78;
+      color: #fff;
+    }
+    .plate-visual.plate-carreta {
+      border: 2px solid #8f0010;
+      background: #b51223;
+      color: #fff;
+    }
+    .plate-visual.plate-vermelha {
+      border: 2px solid #8f0010;
+      background: #b51223;
+      color: #fff;
+      justify-content: center;
+    }
+    .plate-visual.plate-vermelha .plate-country { display: none; }
+    .plate-visual.plate-carreta .plate-country { display: none; }
+    .plate-visual.empty { display: none; }
     .unit-details-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -820,13 +905,595 @@
     .footer-left { display: flex; gap: 8px; }
     .footer-right { display: flex; gap: 8px; }
 
-    @media (max-width: 680px) {
-      .modal-card { padding: 20px; }
-      .vaga-dados-container { flex-direction: column; }
-      .modelo-box { width: 100%; height: 70px; }
-      .plates-registration-grid.two-cols { grid-template-columns: 1fr; }
-      .history-cards-row { grid-template-columns: 1fr; }
-      .extra-fields-row { grid-template-columns: 1fr; }
+    /* PWA & MOBILE APP FIRST STYLES */
+    body {
+      padding-bottom: env(safe-area-inset-bottom);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Offline Banner */
+    .offline-banner {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(180, 83, 9, 0.08);
+    }
+
+    /* Quick Filter Chips Bar */
+    .quick-filter-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .quick-filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      flex-shrink: 0;
+      background: #ffffff;
+      border: 1px solid #d8e4eb;
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334e68;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .filter-chip:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .filter-chip.active {
+      background: #047857;
+      color: #ffffff;
+      border-color: #047857;
+      box-shadow: 0 3px 8px rgba(4, 120, 87, 0.28);
+    }
+    .filter-chip .chip-count {
+      background: rgba(0, 0, 0, 0.07);
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-size: 11px;
+    }
+    .filter-chip.active .chip-count {
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+
+    /* App Views Switcher */
+    .app-view {
+      display: none;
+    }
+    .app-view.active {
+      display: block;
+      animation: fadeInView 0.2s ease;
+    }
+    @keyframes fadeInView {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Map Wrapper & Floating Controls */
+    .map-wrapper {
+      position: relative;
+    }
+    .map-floating-controls {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 100;
+    }
+    .map-ctrl-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+      font-size: 20px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: transform 0.1s, background 0.15s;
+    }
+    .map-ctrl-btn:active {
+      transform: scale(0.92);
+      background: #f1f5f9;
+    }
+
+    /* Slots Mobile Grid & Cards */
+    .slots-mobile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+    .slot-mobile-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      cursor: pointer;
+    }
+    .slot-mobile-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+      border-color: #cbd5e1;
+    }
+    .slot-mobile-card.occupied {
+      border-left: 5px solid #1769aa;
+    }
+    .slot-mobile-card.free {
+      border-left: 5px solid #168653;
+    }
+    .slot-mobile-card.borracharia {
+      border-left: 5px solid #ea580c;
+      background: linear-gradient(180deg, #fffaf5 0%, #ffffff 100%);
+    }
+
+    .sm-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sm-vaga-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      background: #1769aa;
+    }
+    .sm-vaga-badge.free {
+      background: #168653;
+    }
+    .sm-vaga-badge.borr {
+      background: #ea580c;
+    }
+    .sm-zone-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .sm-card-body {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .sm-card-thumb-wrap {
+      width: 86px;
+      height: 58px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .sm-card-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .sm-card-thumb-empty {
+      font-size: 24px;
+      color: #94a3b8;
+    }
+    .sm-card-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .sm-plate-box {
+      display: inline-flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1.5px solid #003399;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 4px;
+    }
+    .sm-plate-header {
+      background: #003399;
+      color: #fff;
+      font-size: 7px;
+      font-weight: 800;
+      padding: 1px 6px;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+    .sm-plate-val {
+      font-size: 13px;
+      font-weight: 900;
+      padding: 1px 8px;
+      color: #111;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .sm-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #475569;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .sm-meta-tag {
+      background: #e2e8f0;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .sm-meta-tag.correios {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .sm-meta-tag.diversos {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .sm-meta-tag.borr {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+
+    .sm-card-btn {
+      width: 100%;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .sm-card-btn:hover {
+      background: #047857;
+      color: #fff;
+      border-color: #047857;
+    }
+
+    /* Borracharia Hero & Cards */
+    .borr-hero-card {
+      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 18px rgba(234, 88, 12, 0.2);
+    }
+    .borr-hero-icon {
+      font-size: 38px;
+      background: rgba(255,255,255,0.2);
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .borr-hero-card h3 {
+      margin: 0 0 4px;
+      font-size: 17px;
+      font-weight: 800;
+    }
+    .borr-hero-card p {
+      margin: 0;
+      font-size: 12px;
+      color: #ffedd5;
+      line-height: 1.4;
+    }
+
+    /* Search Page Box */
+    .search-page-box {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-input-wrap input {
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      border: 2px solid #cbd5e1;
+      padding: 0 40px 0 40px;
+      font-size: 16px;
+      color: #0f172a;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input-wrap input:focus {
+      border-color: #047857;
+    }
+    .search-input-wrap .search-icon {
+      position: absolute;
+      left: 12px;
+      font-size: 18px;
+      color: #64748b;
+      pointer-events: none;
+    }
+    .search-clear-btn {
+      position: absolute;
+      right: 12px;
+      background: #e2e8f0;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+    }
+    .search-quick-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .search-quick-tags button {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      color: #334e68;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .search-quick-tags button:hover {
+      background: #047857;
+      color: #fff;
+      border-color: #047857;
+    }
+
+    /* Bottom Navigation Bar (PWA Mobile) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid #d8e4eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 999;
+      box-shadow: 0 -3px 16px rgba(15, 23, 42, 0.08);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bnav-btn {
+      flex: 1;
+      height: 100%;
+      background: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: #64748b;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.15s, transform 0.1s;
+      padding: 4px 0;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bnav-btn:active {
+      transform: scale(0.95);
+    }
+    .bnav-btn.active {
+      color: #047857;
+    }
+    .bnav-icon {
+      font-size: 19px;
+      line-height: 1;
+    }
+    .bnav-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .bnav-badge {
+      position: absolute;
+      top: 5px;
+      right: calc(50% - 20px);
+      background: #1769aa;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 99px;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    /* Bottom Sheet Handle */
+    .sheet-drag-handle {
+      display: none;
+      width: 44px;
+      height: 5px;
+      background: #cbd5e1;
+      border-radius: 5px;
+      margin: 0 auto 12px;
+    }
+
+    /* RESPONSIVE DESIGN - MOBILE FIRST PWA */
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: calc(68px + env(safe-area-inset-bottom));
+      }
+      .page {
+        padding: 10px 12px;
+      }
+      .top {
+        padding: 8px 12px;
+        gap: 8px;
+        position: sticky;
+        top: 0;
+        z-index: 800;
+      }
+      .top-brand {
+        gap: 10px;
+      }
+      .top-logo {
+        height: 30px;
+      }
+      .top-left h1 {
+        font-size: 15px;
+      }
+      .top-left small {
+        display: none;
+      }
+      .top-search {
+        display: none;
+      }
+      #calibBtn {
+        display: none !important;
+      }
+      .user-info-text strong {
+        font-size: 11px;
+      }
+      .user-info-text small {
+        display: none;
+      }
+      .bar {
+        display: none;
+      }
+
+      /* Modal transformed to Bottom Sheet */
+      .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+      }
+      .modal-card {
+        border-radius: 22px 22px 0 0;
+        max-height: 88vh;
+        padding: 14px 16px 20px;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+        animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes sheetSlideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+      .sheet-drag-handle {
+        display: block;
+      }
+      .modal-footer {
+        position: sticky;
+        bottom: -20px;
+        background: #ffffff;
+        margin: 14px -16px -20px -16px;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+        box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.08);
+        border-top: 1px solid #e2e8f0;
+        z-index: 20;
+        flex-direction: column-reverse;
+      }
+      .footer-right, .footer-left {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+      }
+      .footer-right .btn, .footer-left .btn {
+        flex: 1;
+        height: 44px;
+        font-size: 14px;
+      }
+      .vaga-dados-container {
+        flex-direction: column;
+      }
+      .modelo-box {
+        width: 100%;
+        height: 70px;
+      }
+      .plates-registration-grid.two-cols {
+        grid-template-columns: 1fr;
+      }
+      .history-cards-row {
+        grid-template-columns: 1fr;
+      }
+      .extra-fields-row {
+        grid-template-columns: 1fr;
+      }
+      .form-control {
+        font-size: 16px;
+        height: 42px;
+      }
+      .plate-mercosul-input {
+        font-size: 19px;
+        height: 44px;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .bottom-nav {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -856,6 +1523,9 @@
     <div class="top-search">
       <input id="quickSearch" placeholder="Buscar placa ou vaga..." oninput="filterMap(this.value)">
     </div>
+    <button id="pwaInstallBtn" class="btn pwa-install" onclick="promptPWAInstall()" style="display:none" title="Instalar aplicativo no celular ou computador">
+      📲 Instalar App
+    </button>
     <button id="calibBtn" class="btn calibrate" onclick="toggleCalibration()" title="Arrastar vagas para ajustar posições no mapa">
       ⚙ Ajustar Vagas
     </button>
@@ -866,6 +1536,12 @@
 </header>
 
 <main class="page">
+  <!-- BANNER OFFLINE -->
+  <div id="offlineBanner" class="offline-banner" style="display:none">
+    <span>⚡ <strong>Modo Offline Ativo:</strong> Exibindo dados locais do pátio em cache.</span>
+  </div>
+
+  <!-- BARRA DE ESTATÍSTICAS E LEGENDA (DESKTOP) -->
   <div class="bar">
     <div class="stats-chips" id="statsChips">
       <span class="chip">Carregando vagas...</span>
@@ -877,14 +1553,113 @@
     </div>
   </div>
 
-  <section class="mapcard">
-    <div id="map" class="map"></div>
+  <!-- BARRA DE FILTROS RÁPIDOS (CARROSSEL HORIZONTAL) -->
+  <div class="quick-filter-bar" id="quickFilterBar">
+    <button type="button" class="filter-chip active" data-filter="all" onclick="applyQuickFilter('all')">
+      Todas <span class="chip-count" id="chipTotal">53</span>
+    </button>
+    <button type="button" class="filter-chip chip-free" data-filter="free" onclick="applyQuickFilter('free')">
+      🟢 Livres <span class="chip-count" id="chipFree">0</span>
+    </button>
+    <button type="button" class="filter-chip chip-occ" data-filter="occ" onclick="applyQuickFilter('occ')">
+      🔵 Ocupadas <span class="chip-count" id="chipOcc">0</span>
+    </button>
+    <button type="button" class="filter-chip chip-borr" data-filter="borr" onclick="applyQuickFilter('borr')">
+      🛞 Borracharia <span class="chip-count" id="chipBorr">2</span>
+    </button>
+    <button type="button" class="filter-chip chip-correios" data-filter="correios" onclick="applyQuickFilter('correios')">
+      📬 Correios <span class="chip-count" id="chipCorreios">0</span>
+    </button>
+    <button type="button" class="filter-chip chip-diversos" data-filter="diversos" onclick="applyQuickFilter('diversos')">
+      📦 Diversos <span class="chip-count" id="chipDiversos">0</span>
+    </button>
+  </div>
+
+  <!-- ABA 1: MAPA AÉREO -->
+  <section id="viewMap" class="app-view active">
+    <div class="map-wrapper">
+      <div class="mapcard">
+        <div id="map" class="map"></div>
+      </div>
+      <!-- CONTROLES FLUTUANTES DE ZOOM NO MAPA -->
+      <div class="map-floating-controls">
+        <button type="button" class="map-ctrl-btn" onclick="zoomMap(0.2)" title="Aumentar zoom">＋</button>
+        <button type="button" class="map-ctrl-btn" onclick="zoomMap(-0.2)" title="Diminuir zoom">－</button>
+        <button type="button" class="map-ctrl-btn" onclick="resetMapZoom()" title="Ajustar / Centralizar">⛶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 2: LISTAGEM DE VAGAS EM CARDS (IDEAL PARA OPERADORES NO CELULAR) -->
+  <section id="viewList" class="app-view">
+    <div class="slots-mobile-grid" id="slotsGrid">
+      <!-- Inserido dinamicamente via renderListView() -->
+    </div>
+  </section>
+
+  <!-- ABA 3: BORRACHARIA (VAGAS 01 E 02 DEDICADAS) -->
+  <section id="viewBorr" class="app-view">
+    <div class="borr-hero-card">
+      <div class="borr-hero-icon">🛞</div>
+      <div>
+        <h3>Oficina e Borracharia do Pátio</h3>
+        <p>Vagas 01 e 02 dedicadas exclusivamente à troca de pneus, alinhamento e manutenção emergencial de carretas e cavalos mecânicos.</p>
+      </div>
+    </div>
+    <div class="slots-mobile-grid" id="borrSlotsGrid">
+      <!-- Inserido dinamicamente via renderBorrView() -->
+    </div>
+  </section>
+
+  <!-- ABA 4: BUSCA RÁPIDA -->
+  <section id="viewSearch" class="app-view">
+    <div class="search-page-box">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="mobileSearchInput" placeholder="Digite placa, vaga ou motorista..." oninput="onMobileSearch(this.value)">
+        <button type="button" class="search-clear-btn" onclick="clearMobileSearch()">✕</button>
+      </div>
+      <div class="search-quick-tags">
+        <span>Sugestões:</span>
+        <button type="button" onclick="setSearchQuery('Axor')">Axor</button>
+        <button type="button" onclick="setSearchQuery('19360')">19360</button>
+        <button type="button" onclick="setSearchQuery('Scania')">Scania</button>
+        <button type="button" onclick="setSearchQuery('Correios')">Correios</button>
+        <button type="button" onclick="setSearchQuery('Carreta')">Carreta</button>
+        <button type="button" onclick="setSearchQuery('Livre')">Livres</button>
+      </div>
+    </div>
+    <div class="slots-mobile-grid" id="searchResultsGrid">
+      <!-- Resultados da busca móvel -->
+    </div>
   </section>
 </main>
+
+<!-- BARRA DE NAVEGAÇÃO INFERIOR NATIVA PWA -->
+<nav class="bottom-nav" id="bottomNav">
+  <button type="button" class="bnav-btn active" data-tab="map" onclick="switchTab('map')">
+    <span class="bnav-icon">🗺️</span>
+    <span class="bnav-text">Mapa</span>
+  </button>
+  <button type="button" class="bnav-btn" data-tab="list" onclick="switchTab('list')">
+    <span class="bnav-icon">📋</span>
+    <span class="bnav-text">Vagas</span>
+    <span class="bnav-badge" id="bnavOccupiedBadge">0</span>
+  </button>
+  <button type="button" class="bnav-btn" data-tab="borr" onclick="switchTab('borr')">
+    <span class="bnav-icon">🛞</span>
+    <span class="bnav-text">Borracharia</span>
+  </button>
+  <button type="button" class="bnav-btn" data-tab="search" onclick="switchTab('search')">
+    <span class="bnav-icon">🔍</span>
+    <span class="bnav-text">Busca</span>
+  </button>
+</nav>
 
 <!-- MODAL FLUTUANTE CENTRALIZADO DE DETALHES E CADASTRO DA VAGA -->
 <div id="modalOverlay" class="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal-card">
+    <div class="sheet-drag-handle"></div>
     <div class="modal-header">
       <button class="modal-close-btn" onclick="closeModal()" title="Fechar">✕</button>
       <h2 class="modal-title">Detalhes da vaga selecionada</h2>
@@ -969,6 +1744,10 @@
         <div class="vehicle-unit-card" id="unitCardVehicle">
           <div class="plate-white-badge">
             <span class="plate-lbl" id="labelPlate1">Placa</span>
+            <div id="plateVisual1" class="plate-visual empty" aria-hidden="true">
+              <span class="plate-country">BRASIL</span>
+              <span id="plateVisualText1" class="plate-number">—</span>
+            </div>
             <div class="autocomplete-wrap">
               <input id="inputPlate1" class="plate-input" placeholder="ABC1D23" maxlength="10" autocomplete="off" oninput="onPlateInput('vehicle', this.value)">
               <div id="resultsVehicle" class="autocomplete-results"></div>
@@ -981,6 +1760,7 @@
             <button type="button" class="btn-model-chip" id="chipAxor" onclick="selectModelChoice('Axor')">Axor</button>
             <button type="button" class="btn-model-chip" id="chipVolks" onclick="selectModelChoice('Volks')">Volks / 19360</button>
             <button type="button" class="btn-model-chip" id="chipScania" onclick="selectModelChoice('Scania')">Scania</button>
+            <button type="button" class="btn-model-chip" id="chipCarreta" onclick="selectModelChoice('Carreta')">Carreta</button>
           </div>
 
           <div class="unit-details-grid">
@@ -1007,6 +1787,10 @@
         <div class="vehicle-unit-card" id="unitCardTrailer" style="display:none">
           <div class="plate-white-badge">
             <span class="plate-lbl">Placa Carreta</span>
+            <div id="plateVisual2" class="plate-visual empty" aria-hidden="true">
+              <span class="plate-country">BRASIL</span>
+              <span id="plateVisualText2" class="plate-number">—</span>
+            </div>
             <div class="autocomplete-wrap">
               <input id="inputPlate2" class="plate-input" placeholder="XYZ9E87" maxlength="10" autocomplete="off" oninput="onPlateInput('trailer', this.value)">
               <div id="resultsTrailer" class="autocomplete-results"></div>
@@ -1153,7 +1937,7 @@ let activeSlot = null;
 let currentMode = 'isolated'; // 'isolated' | 'conjunto' | 'empty'
 let isCalibrating = false;
 let currentSlotHistory = [];
-let currentModelChoice = null; // 'Axor' | 'Volks' | 'Scania' | null
+let currentModelChoice = null; // 'Axor' | 'Volks' | 'Scania' | 'Carreta' | null
 
 // DIRETRIZ DE RESOLUÇÃO DE IMAGENS DO MODELO
 function resolveModelImage(mode, cavaloInfo, explicitChoice) {
@@ -1161,32 +1945,22 @@ function resolveModelImage(mode, cavaloInfo, explicitChoice) {
   // A imagem só aparece depois que uma placa real foi informada/localizada.
   if (mode === 'empty' || !cavaloInfo?.plate) return null;
 
-  let modelKey = explicitChoice; // 'Axor' | 'Volks' | 'Scania'
-
-  if (!modelKey) {
-    const text = [
-      cavaloInfo.model || '',
-      cavaloInfo.brand || '',
-      cavaloInfo.type || '',
-      cavaloInfo.plate || '',
-      cavaloInfo.notes || ''
-    ].join(' ').toUpperCase();
-
-    if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044') || text.includes('2544')) {
-      modelKey = 'Axor';
-    } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('R 440') || text.includes('G380') || text.includes('G 380') || text.includes('G420') || text.includes('P360') || text.includes('P 360') || text.includes('G370') || text.includes('G 370')) {
-      modelKey = 'Scania';
-    } else if (text.includes('19360') || text.includes('19.360') || text.includes('19 360') || text.includes('VOLKS') || text.includes('VW') || text.includes('CONSTELLATION')) {
-      modelKey = 'Volks';
-    }
-  }
+  // A placa preenchida não escolhe o modelo automaticamente.
+  // A imagem só aparece quando o usuário seleciona um modelo explicitamente.
+  const modelKey = explicitChoice;
+  if (!modelKey) return null;
 
   // DIRETRIZES DO USUÁRIO:
-  // 1. Para cavalos Axor use a imagem Axor 2038.webp
-  // 2. para cavalo Volks ou 19360 use a imagem 19360.webp
-  // 3. para qualquer conjunto onde o cavalo for Axor use a imagem Conjunto com Axor.webp
-  // 4. conjunto com cavalo Scania use a imagem Conjunto com Scania.webp
-  // 5. conjunto com Volks ou 19360 use a imagem Conjunto com Volks.webp
+  // 1. Para carreta use a imagem Carreta.webp
+  // 2. Para cavalos Axor use a imagem Axor 2038.webp
+  // 3. Para cavalo Volks ou 19360 use a imagem 19360.webp
+  // 4. Para qualquer conjunto onde o cavalo for Axor use a imagem Conjunto com Axor.webp
+  // 5. Conjunto com cavalo Scania use a imagem Conjunto com Scania.webp
+  // 6. Conjunto com Volks ou 19360 use a imagem Conjunto com Volks.webp
+  if (modelKey === 'Carreta') {
+    return { file: 'Carreta.webp', label: 'Carreta' };
+  }
+
   if (mode === 'conjunto') {
     if (modelKey === 'Scania') {
       return { file: 'Conjunto com Scania.webp', label: 'Conjunto com Scania' };
@@ -1213,6 +1987,7 @@ function selectModelChoice(choice) {
     currentModelChoice = choice;
   }
   updateModelChips();
+  updatePlateVisuals();
   updateVehicleModelDisplay();
 }
 
@@ -1220,6 +1995,32 @@ function updateModelChips() {
   document.getElementById('chipAxor')?.classList.toggle('active', currentModelChoice === 'Axor');
   document.getElementById('chipVolks')?.classList.toggle('active', currentModelChoice === 'Volks');
   document.getElementById('chipScania')?.classList.toggle('active', currentModelChoice === 'Scania');
+  document.getElementById('chipCarreta')?.classList.toggle('active', currentModelChoice === 'Carreta');
+}
+
+function updatePlateVisual(unit) {
+  const suffix = unit === 'vehicle' ? '1' : '2';
+  const input = document.getElementById(`inputPlate${suffix}`);
+  const visual = document.getElementById(`plateVisual${suffix}`);
+  const text = document.getElementById(`plateVisualText${suffix}`);
+  if (!input || !visual || !text) return;
+
+  const plate = input.value.trim().toUpperCase();
+  text.textContent = plate || '—';
+  visual.classList.toggle('empty', !plate);
+  const compact = plate.replace(/[^A-Z0-9]/g, '');
+  const isMercosul = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(compact);
+  const isRedPlate = /^[A-Z]{3}[0-9]{3,4}$/.test(compact);
+  const fallbackRed = unit === 'trailer' || (unit === 'vehicle' && currentModelChoice === 'Carreta');
+  visual.classList.toggle('plate-carreta', false);
+  visual.classList.toggle('plate-cavalo', false);
+  visual.classList.toggle('plate-mercosul', isMercosul || (!isRedPlate && !fallbackRed));
+  visual.classList.toggle('plate-vermelha', isRedPlate || (!isMercosul && fallbackRed));
+}
+
+function updatePlateVisuals() {
+  updatePlateVisual('vehicle');
+  updatePlateVisual('trailer');
 }
 
 function getActiveCavaloInfo() {
@@ -1266,6 +2067,229 @@ function updateVehicleModelDisplay() {
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+// PWA & NAVEGAÇÃO DE TELAS MÓVEIS
+let currentTab = 'map';
+let currentFilter = 'all';
+let currentMapZoom = 1;
+
+function switchTab(tabId) {
+  currentTab = tabId;
+  document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+
+  const viewId = 'view' + tabId.charAt(0).toUpperCase() + tabId.slice(1);
+  const viewEl = document.getElementById(viewId);
+  if (viewEl) viewEl.classList.add('active');
+
+  const navBtn = document.querySelector(`.bnav-btn[data-tab="${tabId}"]`);
+  if (navBtn) navBtn.classList.add('active');
+
+  if (tabId === 'list') renderListView();
+  else if (tabId === 'borr') renderBorrView();
+  else if (tabId === 'search') {
+    const input = document.getElementById('mobileSearchInput');
+    if (input) {
+      input.focus();
+      onMobileSearch(input.value);
+    }
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function applyQuickFilter(filterKey) {
+  currentFilter = filterKey;
+  document.querySelectorAll('.filter-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.filter === filterKey);
+  });
+  renderMap();
+  renderListView();
+}
+
+function zoomMap(delta) {
+  currentMapZoom = Math.min(2.4, Math.max(0.65, currentMapZoom + delta));
+  applyMapZoom();
+}
+
+function resetMapZoom() {
+  currentMapZoom = 1;
+  applyMapZoom();
+}
+
+function applyMapZoom() {
+  const mapEl = document.getElementById('map');
+  if (mapEl) {
+    mapEl.style.transform = `scale(${currentMapZoom.toFixed(2)})`;
+    mapEl.style.transformOrigin = 'center 15%';
+    mapEl.style.transition = 'transform 0.2s ease-out';
+  }
+}
+
+function getSlotVehicleResolved(s) {
+  const c = s.current;
+  if (!c) return null;
+  const primaryPlate = c.vehicle?.plate || c.custom_plate || '';
+  if (!primaryPlate) return null;
+  const trailerPlate = c.trailer?.plate || c.custom_trailer || '';
+  const isConjunto = c.mode === 'conjunto' && Boolean(trailerPlate);
+  const mode = isConjunto ? 'conjunto' : 'isolated';
+  const cavaloInfo = {
+    plate: primaryPlate,
+    model: c.vehicle?.model || '',
+    brand: c.vehicle?.brand || '',
+    type: c.vehicle?.type || c.vehicle_kind || '',
+    notes: c.notes || ''
+  };
+  return resolveModelImage(mode, cavaloInfo, c.model_choice || null);
+}
+
+function buildSlotCardHtml(s) {
+  const c = s.current;
+  const isBorr = s.is_borracharia;
+  const isOcc = Boolean(c);
+  const primaryPlate = c?.vehicle?.plate || c?.custom_plate || '';
+  const trailerPlate = c?.trailer?.plate || c?.custom_trailer || '';
+  const isConjunto = c?.mode === 'conjunto' && Boolean(trailerPlate);
+
+  let badgeCls = 'sm-vaga-badge';
+  let badgeLabel = `Vaga ${s.code}`;
+  if (isBorr) {
+    badgeCls += ' borr';
+    badgeLabel = `🛞 Vaga ${s.code} · Borracharia`;
+  } else if (!isOcc) {
+    badgeCls += ' free';
+  }
+
+  const resolved = getSlotVehicleResolved(s);
+  let thumbHtml = '';
+  if (resolved) {
+    thumbHtml = `<div class="sm-card-thumb-wrap"><img src="/imagens/${encodeURIComponent(resolved.file)}" class="sm-card-thumb" alt="${esc(resolved.label)}"></div>`;
+  } else {
+    thumbHtml = `<div class="sm-card-thumb-wrap sm-card-thumb-empty">${isOcc ? '🚛' : '🅿️'}</div>`;
+  }
+
+  let detailsHtml = '';
+  if (isOcc) {
+    const op = c.operation || 'Diversos';
+    let opTagCls = 'sm-meta-tag';
+    if (op.toLowerCase().includes('correios')) opTagCls += ' correios';
+    else if (op.toLowerCase().includes('borr')) opTagCls += ' borr';
+    else opTagCls += ' diversos';
+
+    const plateDisplay = isConjunto ? `${primaryPlate} + ${trailerPlate}` : primaryPlate;
+    detailsHtml = `
+      <div class="sm-card-details">
+        <div class="sm-plate-box">
+          <div class="sm-plate-header">BRASIL</div>
+          <div class="sm-plate-val">${esc(plateDisplay)}</div>
+        </div>
+        <div class="sm-meta-row">
+          <span class="${opTagCls}">${esc(op)}</span>
+          <span>⏱️ ${timeAgo(c.entered_at)}</span>
+          ${c.driver_name ? `<span>👤 ${esc(c.driver_name)}</span>` : ''}
+        </div>
+      </div>
+    `;
+  } else {
+    detailsHtml = `
+      <div class="sm-card-details">
+        <strong style="color:#168653;font-size:14px;display:block;">🟢 Vaga Livre</strong>
+        <span style="font-size:12px;color:#64748b;">Disponível para estacionar</span>
+      </div>
+    `;
+  }
+
+  const btnText = isOcc ? '✏️ Detalhes / Alterar Cadastro' : '➕ Cadastrar / Ocupar Vaga';
+
+  return `
+    <div class="slot-mobile-card ${isBorr ? 'borracharia' : (isOcc ? 'occupied' : 'free')}" onclick="openModal('${s.id}')">
+      <div class="sm-card-top">
+        <span class="${badgeCls}">${badgeLabel}</span>
+        <span class="sm-zone-label">${esc(s.zone)}</span>
+      </div>
+      <div class="sm-card-body">
+        ${thumbHtml}
+        ${detailsHtml}
+      </div>
+      <button type="button" class="sm-card-btn" onclick="event.stopPropagation(); openModal('${s.id}')">
+        ${btnText}
+      </button>
+    </div>
+  `;
+}
+
+function getFilteredSlots() {
+  if (currentFilter === 'free') return slots.filter(s => !s.current);
+  if (currentFilter === 'occ') return slots.filter(s => s.current);
+  if (currentFilter === 'borr') return slots.filter(s => s.is_borracharia);
+  if (currentFilter === 'correios') return slots.filter(s => s.current?.operation?.toLowerCase().includes('correios'));
+  if (currentFilter === 'diversos') return slots.filter(s => s.current?.operation?.toLowerCase().includes('diversos'));
+  return slots;
+}
+
+function renderListView() {
+  const container = document.getElementById('slotsGrid');
+  if (!container) return;
+  const filtered = getFilteredSlots();
+  if (!filtered.length) {
+    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:#64748b;">Nenhuma vaga encontrada para este filtro.</div>`;
+    return;
+  }
+  container.innerHTML = filtered.map(buildSlotCardHtml).join('');
+}
+
+function renderBorrView() {
+  const container = document.getElementById('borrSlotsGrid');
+  if (!container) return;
+  const borrSlots = slots.filter(s => s.is_borracharia);
+  container.innerHTML = borrSlots.map(buildSlotCardHtml).join('');
+}
+
+function onMobileSearch(q) {
+  const container = document.getElementById('searchResultsGrid');
+  if (!container) return;
+  const query = (q || '').trim().toUpperCase();
+  if (!query) {
+    container.innerHTML = slots.map(buildSlotCardHtml).join('');
+    return;
+  }
+  const filtered = slots.filter(s => {
+    const codeMatch = s.code.toUpperCase().includes(query);
+    const zoneMatch = (s.zone || '').toUpperCase().includes(query);
+    const c = s.current;
+    if (!c) return query === 'LIVRE' && !c;
+    const p1 = (c.vehicle?.plate || c.custom_plate || '').toUpperCase();
+    const p2 = (c.trailer?.plate || c.custom_trailer || '').toUpperCase();
+    const op = (c.operation || '').toUpperCase();
+    const driver = (c.driver_name || '').toUpperCase();
+    const model = (c.vehicle?.model || c.vehicle?.brand || '').toUpperCase();
+    return codeMatch || zoneMatch || p1.includes(query) || p2.includes(query) || op.includes(query) || driver.includes(query) || model.includes(query);
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:#64748b;">Nenhum resultado para "<strong>${esc(q)}</strong>".</div>`;
+    return;
+  }
+  container.innerHTML = filtered.map(buildSlotCardHtml).join('');
+}
+
+function clearMobileSearch() {
+  const input = document.getElementById('mobileSearchInput');
+  if (input) {
+    input.value = '';
+    onMobileSearch('');
+    input.focus();
+  }
+}
+
+function setSearchQuery(val) {
+  const input = document.getElementById('mobileSearchInput');
+  if (input) {
+    input.value = val;
+    onMobileSearch(val);
+  }
+}
+
 async function load() {
   try {
     const [slotsData, vehiclesData] = await Promise.all([
@@ -1276,6 +2300,8 @@ async function load() {
     vehicles = vehiclesData;
     renderMap();
     renderStats();
+    renderListView();
+    renderBorrView();
   } catch (err) {
     console.error('Erro ao carregar dados:', err);
   }
@@ -1285,14 +2311,39 @@ function renderStats() {
   const occ = slots.filter(s => s.current).length;
   const free = slots.length - occ;
   const borrOcc = slots.filter(s => s.is_borracharia && s.current).length;
-  document.getElementById('statsChips').innerHTML = `
-    <span class="chip">Total: <b>${slots.length} vagas</b></span>
-    <span class="chip"><i class="dot occ"></i> <b>${occ}</b> ocupadas</span>
-    <span class="chip"><i class="dot free"></i> <b>${free}</b> livres</span>
-    <span class="chip" style="background:#fff7ed;border-color:#fed7aa;color:#9a3412">
-      <i class="dot borr"></i> <b>${borrOcc}/2</b> Borracharia
+  const correiosCount = slots.filter(s => s.current?.operation?.toLowerCase().includes('correios')).length;
+  const diversosCount = slots.filter(s => s.current?.operation?.toLowerCase().includes('diversos')).length;
+
+  const offlineBadge = !navigator.onLine ? `
+    <span class="chip" style="background:#fef2f2;border-color:#fca5a5;color:#991b1b">
+      ⚡ Offline (Cache Ativo)
     </span>
-  `;
+  ` : '';
+  const statsChips = document.getElementById('statsChips');
+  if (statsChips) {
+    statsChips.innerHTML = `
+      <span class="chip">Total: <b>${slots.length} vagas</b></span>
+      <span class="chip"><i class="dot occ"></i> <b>${occ}</b> ocupadas</span>
+      <span class="chip"><i class="dot free"></i> <b>${free}</b> livres</span>
+      <span class="chip" style="background:#fff7ed;border-color:#fed7aa;color:#9a3412">
+        <i class="dot borr"></i> <b>${borrOcc}/2</b> Borracharia
+      </span>
+      ${offlineBadge}
+    `;
+  }
+
+  // Contadores das abas e chips rápidos
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('chipTotal', slots.length);
+  setEl('chipFree', free);
+  setEl('chipOcc', occ);
+  setEl('chipBorr', '2');
+  setEl('chipCorreios', correiosCount);
+  setEl('chipDiversos', diversosCount);
+  setEl('bnavOccupiedBadge', occ);
+
+  const banner = document.getElementById('offlineBanner');
+  if (banner) banner.style.display = navigator.onLine ? 'none' : 'flex';
 }
 
 function renderMap() {
@@ -1307,8 +2358,23 @@ function renderMap() {
     const trailerPlate = c?.trailer?.plate || c?.custom_trailer || '';
     const isConjunto = c?.mode === 'conjunto' && Boolean(trailerPlate);
     const displayPlate = isConjunto ? `${primaryPlate} + ${trailerPlate}` : primaryPlate;
-    const vehicleModeLabel = isConjunto ? 'Conjunto' : 'Veículo desatrelado';
-    const typeIcon = isConjunto ? '🔗' : '🚛';
+    const isolatedTypeText = [
+      c?.vehicle?.type || '',
+      c?.vehicle?.model || '',
+      c?.vehicle?.brand || '',
+      c?.vehicle_kind || ''
+    ].join(' ').toUpperCase();
+    const isIsolatedTrailer = !isConjunto && (
+      isolatedTypeText.includes('CARRETA') ||
+      isolatedTypeText.includes('REBOQUE') ||
+      isolatedTypeText.includes('SRF') ||
+      isolatedTypeText.includes('RANDON') ||
+      isolatedTypeText.includes('FACCHINI')
+    );
+    const vehicleModeLabel = isConjunto
+      ? 'Conjunto'
+      : (isIsolatedTrailer ? 'Carreta desatrelada' : 'Cavalo desatrelado');
+    const typeIcon = isConjunto ? '🔗' : (isIsolatedTrailer ? '🚚' : '🚛');
 
     if (isBorr) {
       title = `🛞 Vaga ${s.code} — Borracharia`;
@@ -1319,10 +2385,18 @@ function renderMap() {
       title += `\n${vehicleModeLabel}: ${displayPlate}\nOperação: ${c.operation}`;
     }
 
+    let isFilteredOut = false;
+    if (currentFilter === 'free' && c) isFilteredOut = true;
+    else if (currentFilter === 'occ' && !c) isFilteredOut = true;
+    else if (currentFilter === 'borr' && !isBorr) isFilteredOut = true;
+    else if (currentFilter === 'correios' && !c?.operation?.toLowerCase().includes('correios')) isFilteredOut = true;
+    else if (currentFilter === 'diversos' && !c?.operation?.toLowerCase().includes('diversos')) isFilteredOut = true;
+
     const cls = [
       'slot',
       c ? 'occupied' : '',
-      isBorr ? 'borracharia' : ''
+      isBorr ? 'borracharia' : '',
+      isFilteredOut ? 'dimmed' : ''
     ].filter(Boolean).join(' ');
 
     const hoverCard = c && displayPlate
@@ -1450,8 +2524,10 @@ async function openModal(id) {
   currentModelChoice = null;
   if (c) {
     const v = c.vehicle || {};
-    const text = [v.model || '', v.brand || '', v.type || '', v.plate || c.custom_plate || '', c.notes || ''].join(' ').toUpperCase();
-    if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044')) {
+    const text = [v.model || '', v.brand || '', v.type || '', v.plate || c.custom_plate || '', c.notes || '', c.vehicle_kind || ''].join(' ').toUpperCase();
+    if (c.vehicle_kind === 'Carreta' || text.includes('CARRETA') || text.includes('SEMI REBOQUE') || text.includes('SEMI-REBOQUE') || text.includes('SR/') || text.includes('SRF') || text.includes('RANDON') || text.includes('FACCHINI') || (v.type && v.type.toUpperCase().includes('CARRETA'))) {
+      currentModelChoice = 'Carreta';
+    } else if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044')) {
       currentModelChoice = 'Axor';
     } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('G380') || text.includes('G420') || text.includes('P360') || text.includes('G370')) {
       currentModelChoice = 'Scania';
@@ -1460,6 +2536,7 @@ async function openModal(id) {
     }
   }
   updateModelChips();
+  updatePlateVisuals();
   updateVehicleModelDisplay();
 
   // Carrega histórico da vaga para atualizar a Seção 3
@@ -1511,6 +2588,7 @@ function setMode(mode) {
     labelPlate1.textContent = 'Placa';
     extraFields.style.display = 'block';
   }
+  updatePlateVisuals();
   updateVehicleModelDisplay();
 }
 
@@ -1542,20 +2620,11 @@ function onPlateInput(unit, text) {
   // Atualiza campo com placa maiúscula
   if (unit === 'vehicle') document.getElementById('inputPlate1').value = q;
   else document.getElementById('inputPlate2').value = q;
+  updatePlateVisual(unit);
 
   if (unit === 'vehicle') {
-    const matched = vehicles.find(v => v.plate.toUpperCase() === q);
-    if (matched) {
-      const text = [matched.model || '', matched.brand || '', matched.type || '', q].join(' ').toUpperCase();
-      if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044')) {
-        currentModelChoice = 'Axor';
-      } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('G380') || text.includes('G420') || text.includes('P360') || text.includes('G370')) {
-        currentModelChoice = 'Scania';
-      } else if (text.includes('19360') || text.includes('19.360') || text.includes('VOLKS') || text.includes('VW')) {
-        currentModelChoice = 'Volks';
-      }
-      updateModelChips();
-    }
+    currentModelChoice = null;
+    updateModelChips();
     updateVehicleModelDisplay();
   }
 
@@ -1563,6 +2632,7 @@ function onPlateInput(unit, text) {
     resultsEl.classList.remove('show');
     clearCard(unit);
     document.getElementById(unit === 'vehicle' ? 'vehicleDbId' : 'trailerDbId').value = '';
+    updatePlateVisual(unit);
     if (unit === 'vehicle') updateVehicleModelDisplay();
     return;
   }
@@ -1606,17 +2676,12 @@ function selectPlate(unit, id, plate, tipo, status, chassi, base) {
   updateCardDetails(unit, tipo || (unit === 'vehicle' ? 'Cavalo' : 'Carreta'), status || 'Em atividade', chassi || 'Consultado no BD', base || '—');
 
   if (unit === 'vehicle') {
-    const matched = vehicles.find(v => String(v.id) === String(id) || v.plate.toUpperCase() === plate.toUpperCase());
-    const text = [matched?.model || '', matched?.brand || '', matched?.type || '', tipo || '', plate].join(' ').toUpperCase();
-    if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044')) {
-      currentModelChoice = 'Axor';
-    } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('G380') || text.includes('G420') || text.includes('P360') || text.includes('G370')) {
-      currentModelChoice = 'Scania';
-    } else if (text.includes('19360') || text.includes('19.360') || text.includes('VOLKS') || text.includes('VW')) {
-      currentModelChoice = 'Volks';
-    }
+    currentModelChoice = null;
     updateModelChips();
+    updatePlateVisual('vehicle');
     updateVehicleModelDisplay();
+  } else {
+    updatePlateVisual('trailer');
   }
 }
 
@@ -1685,6 +2750,7 @@ async function saveOccupancy() {
 
   const vehicleId = document.getElementById('vehicleDbId').value || null;
   const plate1 = document.getElementById('inputPlate1').value.trim().toUpperCase() || null;
+  const vehicleKind = mode === 'isolated' && currentModelChoice === 'Carreta' ? 'Carreta' : null;
 
   const trailerId = document.getElementById('trailerDbId').value || null;
   const plate2 = document.getElementById('inputPlate2').value.trim().toUpperCase() || null;
@@ -1717,6 +2783,7 @@ async function saveOccupancy() {
     customTrailer: mode === 'conjunto' ? plate2 : null,
     driver,
     notes,
+    vehicleKind,
     enteredAt: activeSlot.current?.entered_at || new Date().toISOString()
   };
 
@@ -1848,6 +2915,49 @@ document.addEventListener('click', e => {
 });
 
 load();
+
+// REGISTRO DE SERVICE WORKER PARA PWA E SUPORTE OFFLINE
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(reg => {
+        console.log('PWA ServiceWorker ativo:', reg.scope);
+      })
+      .catch(err => {
+        console.warn('Erro ao registrar ServiceWorker:', err);
+      });
+  });
+}
+
+// INSTALAÇÃO DO APLICATIVO PWA
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'inline-flex';
+});
+
+async function promptPWAInstall() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    const btn = document.getElementById('pwaInstallBtn');
+    if (btn) btn.style.display = 'none';
+  }
+  deferredPrompt = null;
+}
+
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'none';
+  deferredPrompt = null;
+  console.log('PWA instalado com sucesso!');
+});
+
+window.addEventListener('online', () => renderStats());
+window.addEventListener('offline', () => renderStats());
 </script>
 </body>
 </html>

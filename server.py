@@ -92,13 +92,14 @@ def init_db():
         custom_trailer TEXT,
         driver TEXT,
         notes TEXT,
+        vehicle_kind TEXT,
         entered_at TEXT NOT NULL,
         exited_at TEXT,
         created_at TEXT NOT NULL,
         FOREIGN KEY(slot_id) REFERENCES slots(id)
       );
     ''')
-    for col in ['custom_plate', 'custom_trailer', 'driver', 'notes']:
+    for col in ['custom_plate', 'custom_trailer', 'driver', 'notes', 'vehicle_kind']:
         try: conn.execute(f'ALTER TABLE slot_history ADD COLUMN {col} TEXT')
         except sqlite3.OperationalError: pass
     try: conn.execute('ALTER TABLE slots ADD COLUMN is_borracharia INTEGER DEFAULT 0')
@@ -246,11 +247,12 @@ class Handler(BaseHTTPRequestHandler):
         custom_trailer = (payload.get('customTrailer') or '').strip().upper() or None
         driver = (payload.get('driver') or '').strip() or None
         notes = (payload.get('notes') or '').strip() or None
+        vehicle_kind = (payload.get('vehicleKind') or '').strip() or None
         entered_at = payload.get('enteredAt') or now()
 
         if mode == 'isolated' and not vehicle_id and not custom_plate:
             return self.send_json({'error': 'Informe a placa ou selecione um veículo da lista'}, 400)
-        if mode == 'conjunto' and not (vehicle_id or custom_plate) and not (trailer_id or custom_trailer):
+        if mode == 'conjunto' and (not (vehicle_id or custom_plate) or not (trailer_id or custom_trailer)):
             return self.send_json({'error': 'Informe o cavalo e a carreta'}, 400)
 
         conn = db(APP_DB)
@@ -288,9 +290,9 @@ class Handler(BaseHTTPRequestHandler):
             conn.execute('UPDATE slot_history SET exited_at=? WHERE id=?', (timestamp, active['id']))
         if mode != 'empty':
             conn.execute('''
-                INSERT INTO slot_history(slot_id, mode, operation, vehicle_id, trailer_id, custom_plate, custom_trailer, driver, notes, entered_at, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (slot_id, mode, operation, vehicle_id, trailer_id, custom_plate, custom_trailer, driver, notes, entered_at, timestamp))
+                INSERT INTO slot_history(slot_id, mode, operation, vehicle_id, trailer_id, custom_plate, custom_trailer, driver, notes, vehicle_kind, entered_at, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (slot_id, mode, operation, vehicle_id, trailer_id, custom_plate, custom_trailer, driver, notes, vehicle_kind, entered_at, timestamp))
         conn.commit()
         conn.close()
         return self.send_json({'success': True})
@@ -324,12 +326,16 @@ class Handler(BaseHTTPRequestHandler):
             '.svg': 'image/svg+xml',
             '.css': 'text/css; charset=utf-8',
             '.js': 'application/javascript; charset=utf-8',
-            '.json': 'application/json; charset=utf-8'
+            '.json': 'application/json; charset=utf-8',
+            '.webmanifest': 'application/manifest+json; charset=utf-8'
         }
-        mime = mime_map.get(ext, 'application/octet-stream')
+        mime = 'application/manifest+json; charset=utf-8' if path.name in ('manifest.json', 'manifest.webmanifest') else mime_map.get(ext, 'application/octet-stream')
         self.send_response(200)
         self.send_header('Content-Type', mime)
         self.send_header('Content-Length', str(len(data)))
+        if path.name == 'sw.js':
+            self.send_header('Service-Worker-Allowed', '/')
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.end_headers()
         self.wfile.write(data)
 

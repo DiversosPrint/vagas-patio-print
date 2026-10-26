@@ -1,0 +1,43 @@
+{
+  "name": "Monitoramento de vagas pátios Print",
+  "short_name": "Vagas Print",
+  "description": "Sistema de monitoramento e controle de vagas de pátio em tempo real — Print Entregando Soluções",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#064e3b",
+  "theme_color": "#064e3b",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/imagens/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagens/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mapa de Vagas",
+      "short_name": "Mapa",
+      "description": "Visualizar mapa de vagas do Pátio Jaraguá",
+      "url": "/index.html",
+      "icons": [{ "src": "/imagens/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Trocar Operador",
+      "short_name": "Login",
+      "description": "Acessar tela de login e seleção de perfil",
+      "url": "/login.html",
+      "icons": [{ "src": "/imagens/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
