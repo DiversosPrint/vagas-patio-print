@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parent
 PUBLIC = ROOT / 'public'
 SOURCE_DB = Path(os.environ.get('PATIO_DB_PATH', r'C:\Users\Pixel Midia 3D\controle-patio-print\database\patio.db'))
 VEHICLE_SHEET = Path(os.environ.get('PATIO_VEICULOS_PATH', str(ROOT / 'data' / 'veiculos.xls')))
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
 APP_DB = Path(os.environ['VAGAS_PATIO_DB_PATH']) if os.environ.get('VAGAS_PATIO_DB_PATH') else SOURCE_DB.parent / 'vagas_patio.db'
 PORT = int(os.environ.get('PORT', os.environ.get('VAGAS_PATIO_PORT', '8787')))
 HOST = os.environ.get('HOST', '0.0.0.0')
@@ -130,6 +131,10 @@ def init_db():
     conn.close()
 
 def vehicle_rows():
+    if DATABASE_URL:
+        rows = postgres_vehicle_rows()
+        if rows:
+            return rows
     sheet_rows = spreadsheet_vehicle_rows()
     if sheet_rows:
         return sheet_rows
@@ -146,6 +151,25 @@ def vehicle_rows():
     """).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+def postgres_vehicle_rows():
+    try:
+        import psycopg
+        from psycopg.rows import dict_row
+        with psycopg.connect(DATABASE_URL, row_factory=dict_row, connect_timeout=10) as conn:
+            rows = conn.execute("""
+                SELECT v.id, v.plate, v.type, v.yard, v.chassis, v.status, v.entryTime, v.exitTime, v.base, v.baseDestino,
+                       v.entregar_diversos, v.entregar_correios,
+                       c.brand, c.model
+                FROM vehicles v
+                LEFT JOIN vehicle_catalog c ON UPPER(v.plate) = UPPER(c.plate)
+                WHERE COALESCE(v.status,'') <> 'Liberado'
+                ORDER BY v.plate
+            """).fetchall()
+            return [dict(row) for row in rows]
+    except Exception as exc:
+        print(f'Falha ao consultar PostgreSQL; usando fallback local: {exc}')
+        return []
 
 def vehicle_map(): return {str(v['id']): v for v in vehicle_rows()}
 
