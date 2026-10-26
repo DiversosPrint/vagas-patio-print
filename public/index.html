@@ -554,6 +554,13 @@
     .modelo-img:hover {
       transform: scale(1.04);
     }
+    .modelo-img.modelo-img-scania {
+      height: 112px;
+      transform: scale(1.08);
+    }
+    .modelo-img.modelo-img-scania:hover {
+      transform: scale(1.12);
+    }
     .modelo-placeholder {
       display: flex;
       flex-direction: column;
@@ -1765,6 +1772,10 @@
               <strong id="card1Modelo">—</strong>
             </div>
             <div class="detail-item">
+              <span>Marca</span>
+              <strong id="card1Marca">—</strong>
+            </div>
+            <div class="detail-item">
               <span>Status</span>
               <strong id="card1Status">Em atividade</strong>
             </div>
@@ -1802,6 +1813,10 @@
             <div class="detail-item">
               <span>Modelo</span>
               <strong id="card2Modelo">—</strong>
+            </div>
+            <div class="detail-item">
+              <span>Marca</span>
+              <strong id="card2Marca">—</strong>
             </div>
             <div class="detail-item">
               <span>Status</span>
@@ -1970,6 +1985,9 @@ function resolveModelImage(mode, cavaloInfo, explicitChoice) {
     return { file: 'Conjunto com Axor.webp', label: 'Conjunto com Axor' };
   } else {
     // mode === 'isolated' (Cavalo desatrelado)
+    if (modelKey === 'Scania') {
+      return { file: 'Scania.webp', label: 'Scania P 360' };
+    }
     if (modelKey === 'Volks') {
       return { file: '19360.webp', label: 'Cavalo Volks 19.360' };
     }
@@ -1981,8 +1999,8 @@ function resolveModelImage(mode, cavaloInfo, explicitChoice) {
 function detectModelChoice(info = {}) {
   const text = [info.model || '', info.brand || '', info.type || '', info.plate || '', info.vehicle_kind || ''].join(' ').toUpperCase();
   if (text.includes('CARRETA') || text.includes('SEMI REBOQUE') || text.includes('SEMI-REBOQUE') || text.includes('SR/') || text.includes('SRF') || text.includes('RANDON') || text.includes('FACCHINI')) return 'Carreta';
-  if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044') || text.includes('2544')) return 'Axor';
   if (text.includes('SCANIA') || text.includes('R440') || text.includes('R 440') || text.includes('G380') || text.includes('G 380') || text.includes('G420') || text.includes('P360') || text.includes('P 360') || text.includes('G370') || text.includes('G 370')) return 'Scania';
+  if (text.includes('M.BENZ') || text.includes('MERCEDES') || text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044') || text.includes('2544')) return 'Axor';
   if (text.includes('19360') || text.includes('19.360') || text.includes('19 360') || text.includes('VOLKS') || text.includes('VW') || text.includes('CONSTELLATION')) return 'Volks';
   return null;
 }
@@ -2057,6 +2075,7 @@ function updateVehicleModelDisplay() {
   if (resolved) {
     imgEl.src = '/imagens/' + encodeURIComponent(resolved.file);
     imgEl.alt = resolved.label;
+    imgEl.classList.toggle('modelo-img-scania', resolved.file === 'Scania.webp');
     imgEl.style.display = 'block';
     phEl.style.display = 'none';
     badgeEl.textContent = '';
@@ -2064,6 +2083,7 @@ function updateVehicleModelDisplay() {
     document.getElementById('modeloBox').style.display = 'block';
   } else {
     imgEl.src = '';
+    imgEl.classList.remove('modelo-img-scania');
     imgEl.style.display = 'none';
     phEl.style.display = 'none';
     badgeEl.textContent = '';
@@ -2526,7 +2546,7 @@ async function openModal(id) {
     const plate1 = v.plate || c.custom_plate || '';
     document.getElementById('inputPlate1').value = plate1;
     document.getElementById('vehicleDbId').value = v.id || '';
-    updateCardDetails('vehicle', v.type || 'Cavalo', 'Em atividade', v.chassis || 'Consultado no BD', v.baseDestino || '—', v.model || '—');
+    updateCardDetails('vehicle', v.type || 'Cavalo', 'Em atividade', v.chassis || 'Consultado no BD', v.baseDestino || '—', v.model || '—', v.brand || '—');
 
     // Preenche Carreta / Placa 2
     if (c.mode === 'conjunto') {
@@ -2534,7 +2554,7 @@ async function openModal(id) {
       const plate2 = t.plate || c.custom_trailer || '';
       document.getElementById('inputPlate2').value = plate2;
       document.getElementById('trailerDbId').value = t.id || '';
-      updateCardDetails('trailer', t.type || 'Carreta', 'Em atividade', t.chassis || 'Consultado no BD', t.baseDestino || '—', t.model || '—');
+      updateCardDetails('trailer', t.type || 'Carreta', 'Em atividade', t.chassis || 'Consultado no BD', t.baseDestino || '—', t.model || '—', t.brand || '—');
     } else {
       clearCard('trailer');
     }
@@ -2549,20 +2569,7 @@ async function openModal(id) {
   }
 
   // Identifica o modelo do cavalo para exibir a imagem correspondente no card
-  currentModelChoice = null;
-  if (c) {
-    const v = c.vehicle || {};
-    const text = [v.model || '', v.brand || '', v.type || '', v.plate || c.custom_plate || '', c.notes || '', c.vehicle_kind || ''].join(' ').toUpperCase();
-    if (c.vehicle_kind === 'Carreta' || text.includes('CARRETA') || text.includes('SEMI REBOQUE') || text.includes('SEMI-REBOQUE') || text.includes('SR/') || text.includes('SRF') || text.includes('RANDON') || text.includes('FACCHINI') || (v.type && v.type.toUpperCase().includes('CARRETA'))) {
-      currentModelChoice = 'Carreta';
-    } else if (text.includes('AXOR') || text.includes('2036') || text.includes('2038') || text.includes('2041') || text.includes('2044')) {
-      currentModelChoice = 'Axor';
-    } else if (text.includes('SCANIA') || text.includes('R440') || text.includes('G380') || text.includes('G420') || text.includes('P360') || text.includes('G370')) {
-      currentModelChoice = 'Scania';
-    } else if (text.includes('19360') || text.includes('19.360') || text.includes('VOLKS') || text.includes('VW')) {
-      currentModelChoice = 'Volks';
-    }
-  }
+  currentModelChoice = c ? detectModelChoice(getActiveCavaloInfo()) : null;
   updateModelChips();
   updatePlateVisuals();
   updateVehicleModelDisplay();
@@ -2624,11 +2631,12 @@ function onOpChange(val) {
   document.getElementById('valOperacao').textContent = val;
 }
 
-function updateCardDetails(unit, tipo, status, chassi, base, modelo) {
+function updateCardDetails(unit, tipo, status, chassi, base, modelo, marca) {
   const prefix = unit === 'vehicle' ? 'card1' : 'card2';
   document.getElementById(`${prefix}Tipo`).textContent = tipo || 'Cavalo';
   document.getElementById(`${prefix}Status`).textContent = 'Em atividade';
   document.getElementById(`${prefix}Modelo`).textContent = modelo || '—';
+  document.getElementById(`${prefix}Marca`).textContent = marca || '—';
   document.getElementById(`${prefix}Chassi`).textContent = chassi || 'Consultado no BD';
   document.getElementById(`${prefix}Base`).textContent = base || '—';
 }
@@ -2637,6 +2645,7 @@ function clearCard(unit, emptyState = false) {
   const prefix = unit === 'vehicle' ? 'card1' : 'card2';
   document.getElementById(`${prefix}Tipo`).textContent = emptyState ? '—' : (unit === 'vehicle' ? 'Cavalo' : 'Carreta');
   document.getElementById(`${prefix}Modelo`).textContent = '—';
+  document.getElementById(`${prefix}Marca`).textContent = '—';
   document.getElementById(`${prefix}Status`).textContent = emptyState ? '—' : 'Em atividade';
   document.getElementById(`${prefix}Chassi`).textContent = emptyState ? '—' : 'Consultado no BD';
   document.getElementById(`${prefix}Base`).textContent = '—';
@@ -2657,7 +2666,7 @@ function onPlateInput(unit, text) {
     currentModelChoice = matched ? detectModelChoice(matched) : null;
     updateModelChips();
     if (matched) {
-      updateCardDetails('vehicle', matched.type, 'Em atividade', matched.chassis, matched.baseDestino, matched.model);
+      updateCardDetails('vehicle', matched.type, 'Em atividade', matched.chassis, matched.baseDestino, matched.model, matched.brand);
     }
     updateVehicleModelDisplay();
   }
@@ -2708,7 +2717,7 @@ function selectPlate(unit, id, plate, tipo, status, chassi, base) {
   resultsEl.classList.remove('show');
 
   const matched = vehicles.find(v => String(v.id) === String(id) || v.plate.toUpperCase() === plate.toUpperCase());
-  updateCardDetails(unit, tipo || (unit === 'vehicle' ? 'Cavalo' : 'Carreta'), 'Em atividade', chassi || 'Consultado no BD', base || '—', matched?.model || '—');
+  updateCardDetails(unit, tipo || (unit === 'vehicle' ? 'Cavalo' : 'Carreta'), 'Em atividade', chassi || 'Consultado no BD', base || '—', matched?.model || '—', matched?.brand || '—');
 
   if (unit === 'vehicle') {
     currentModelChoice = detectModelChoice(matched || { type: tipo, plate });
@@ -2833,8 +2842,11 @@ async function saveOccupancy() {
       alert(err.error || 'Erro ao salvar cadastro.');
       return;
     }
+    const savedSlotId = activeSlot.id;
+    closeModal();
     await load();
-    openModal(activeSlot.id);
+    const savedSlot = slots.find(slot => slot.id === savedSlotId);
+    if (savedSlot) activeSlot = savedSlot;
   } catch (err) {
     alert('Erro de conexão ao salvar.');
   }
