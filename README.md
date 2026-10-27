@@ -2,7 +2,18 @@
 
 Sistema separado para visualizar as vagas do Pátio Jaraguá, consultar veículos no banco existente e registrar o histórico diário de ocupação.
 
-## Executar
+## Executar com Node.js
+
+O backend principal agora é Node.js, compatível com a opção **Web app Node.js** da Hostinger.
+
+```powershell
+npm install
+npm start
+```
+
+Abra `http://localhost:8787`.
+
+## Executar com Python (legado)
 
 ```powershell
 python server.py
@@ -30,7 +41,9 @@ $env:DATABASE_URL = 'postgres://usuario:senha@host:porta/banco?sslmode=require'
 python server.py
 ```
 
-No Render, cadastre `DATABASE_URL` em Environment como Secret. Não coloque a senha no código, no README ou no Git.
+No Render ou na Hostinger, cadastre `DATABASE_URL` como variável secreta. Não coloque a senha no código, no README ou no Git.
+
+Na Hostinger, configure o comando de inicialização como `npm start`, a versão Node.js 18 ou superior e a porta usando a variável `PORT` fornecida pelo ambiente.
 
 Para usar outra planilha, configure:
 
